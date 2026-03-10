@@ -14,6 +14,7 @@ if (!process.env.JWT_SECRET) {
 
 const fastify = require('fastify')({ logger: true });
 const fastifyJwt = require('@fastify/jwt');
+const { REPL_MODE_SLOPPY } = require('repl');
 
 const port = process.env.PORT;
 
@@ -24,8 +25,6 @@ const conn = new Sequelize(process.env.AUTH_DB_NAME, process.env.AUTH_DB_UNAME, 
     logging: console.log,
 });
 
-
-
 const Tenant = conn.define('Tenant', {
   business_name : {
     type : DataTypes.STRING,
@@ -35,10 +34,14 @@ const Tenant = conn.define('Tenant', {
   subscription_plan : {
     type: DataTypes.STRING,
     allowNull: false
+  },
+  RUC: {
+    type: DataTypes.STRING,
+    allowNull: false
   }
 }, {timestamps: true});
 
-const User = conn.define('User', {
+const Employee = conn.define('Employee', {
   email : {
     type: DataTypes.STRING,
     allowNull: false,
@@ -59,14 +62,18 @@ const User = conn.define('User', {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+  role: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   law_787_accepted: {
     type: DataTypes.BOOLEAN,
     defaultValue: false
   },
 }, {
   hooks: {
-    beforeSave: async (user) => {
-      if (user.changed('password')){
+    beforeSave: async (employee) => {
+      if (employee.changed('password')){
         const saltRounds = 12;
         const pepper = process.env.AUTH_DB_PEPPER;
 
@@ -75,8 +82,8 @@ const User = conn.define('User', {
           throw new Error("SECRET_MANAGEMENT_ERROR: Pepper is not defined in .env");
         }
 
-        const passwordWithPepper = password + pepper;
-        user.password = await bcrypt.hash(passwordWithPepper, saltRounds);
+        const passwordWithPepper = employee.password + pepper;
+        employee.password = await bcrypt.hash(passwordWithPepper, saltRounds);
       }
     }
   },
@@ -84,7 +91,8 @@ const User = conn.define('User', {
 }
 );
 
-User.belongsTo(Tenant, {foreignKey: 'tenant_id'});
+Tenant.hasMany(Employee, { foreignKey: 'tenant_id' });
+Employee.belongsTo(Tenant, {foreignKey: 'tenant_id'});
 
 // 1. Registrar el plugin de JWT
 fastify.register(fastifyJwt, {
@@ -104,7 +112,7 @@ fastify.decorate("authenticate", async function(request, reply) {
 fastify.post('/login', async (request, reply) => {
   const { email, password } = request.body;
 
-  const user = await User.findOne({where : { email }});
+  const user = await Employee.findOne({where : { email }});
   const pepper = process.env.AUTH_DB_PEPPER;
 
   const isMatch = await bcrypt.compare(password + pepper, user.password);
@@ -122,6 +130,30 @@ fastify.post('/login', async (request, reply) => {
   
   return reply.code(401).send({ message: 'Credenciales inválidas' });
 });
+
+fastify.post('/employees', async (request, reply) => {
+  const { email, password, first_name, last_name, tenant_id, law_787_accepted, role } = request.body;
+
+  // We will need a middleware to validate that data
+
+  const employeeObject = {
+    email,
+    first_name,
+    last_name,
+    password,
+    tenant_id,
+    role,
+    law_787_accepted,
+  };
+
+  try {
+    const newEmployee = await Employee.create(employeeObject);
+    return newEmployee;
+  } catch (error) {
+    console.log("Could not create new employee: ", error);
+    reply.code(500).send({error: `Database error: ${error}`});
+  }
+})
 
 // 4. Ruta Protegida (Ejemplo: Ver CVs)
 fastify.get('/candidates', { onRequest: [fastify.authenticate] }, async (request, reply) => {
