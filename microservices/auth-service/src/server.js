@@ -19,7 +19,7 @@ const start = async () => {
     console.log('Conexión a la DB establecida correctamente.');
 
     const port = process.env.PORT || 3002; 
-    await fastify.listen({ port, host: '0.0.0.0' });
+    await fastify.listen({ port });
     
     console.log(`Auth Service activo en el puerto ${port}`);
   } catch (err) {

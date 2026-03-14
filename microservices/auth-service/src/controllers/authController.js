@@ -71,3 +71,28 @@ exports.registerCandidate = async (request, reply) => {
     reply.code(500).send({ error: `Database error: ${error.message}` });
   }
 };
+
+exports.registerEmployee = async (request, reply) => {
+  const { email, password, first_name, last_name, tenant_id, law_787_accepted, role } = request.body;
+
+  // We will need a middleware to validate that data
+
+  const employeeObject = {
+    email,
+    first_name,
+    last_name,
+    password,
+    tenant_id,
+    role,
+    law_787_accepted,
+  };
+
+  try {
+    const newEmployee = await Employee.create(employeeObject);
+    return newEmployee;
+  } catch (error) {
+    console.log("Could not create new employee: ", error);
+    reply.code(500).send({error: `Database error: ${error}`});
+  }
+  
+}
