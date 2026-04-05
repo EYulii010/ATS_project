@@ -15,9 +15,14 @@ subscription_plan : {
   },
   RUC: {
     type: DataTypes.STRING,
-    allowNull: false
-
+    allowNull: false,
+    unique: true,
   },
+  active_subscription : {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  }
 }, { 
   timestamps: true 
 });

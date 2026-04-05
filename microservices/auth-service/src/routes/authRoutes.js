@@ -6,7 +6,7 @@ async function authRoutes(fastify, options) {
   fastify.post('/login', authController.login);
 
   // Ruta para registrar reclutadores/empleados de empresas
-  fastify.post('/employees', authController.registerEmployee);
+  fastify.post('/register/employee', authController.registerEmployee);
 
   // Ruta para registrar candidatos independientes
   fastify.post('/register/candidate', authController.registerCandidate);
