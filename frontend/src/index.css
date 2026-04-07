@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+@theme {
+  /* DIRECTIONS: Replace these hex codes with the actual 
+     brand colors from your Marketing team's Figma file.
+  */
+  --color-applik-primary: #6366f1;   /* Example Purple */
+  --color-applik-secondary: #08060d; /* Your dark text-h color */
+  --color-applik-accent: #aa3bff;
+  
+  /* Standardizing fonts for the Nicaraguan market (clean & readable) */
+  --font-sans: "Inter", system-ui, sans-serif;
+}
+
+/* We use @layer base to ensure standard tags behave, 
+   but don't override our utility classes.
+*/
+@layer base {
+  body {
+    @apply bg-white text-slate-900 antialiased;
+  }
+  
+  /* This allows <h1 className="text-blue-600"> to actually work */
+  h1, h2, h3, h4, h5, h6 {
+    color: inherit;
+    font-size: inherit;
+    margin: 0;
+  }
+}
