@@ -1,0 +1,21 @@
+{
+  "name": "ai-service",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EYulii010/ATS_project.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/EYulii010/ATS_project/issues"
+  },
+  "homepage": "https://github.com/EYulii010/ATS_project#readme",
+  "keywords": [],
+  "description": ""
+}
+
