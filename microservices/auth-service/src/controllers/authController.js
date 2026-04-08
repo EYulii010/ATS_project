@@ -11,7 +11,7 @@ const checkIfUserExists = async (email) => {
   return !!candidate; 
 };
 
-exports.login = async (request, reply) => {
+exports.handleLogin = async (request, reply) => {
   const { email, password } = request.body;
   const pepper = process.env.AUTH_DB_PEPPER;
 
@@ -52,75 +52,79 @@ exports.login = async (request, reply) => {
   }
 };
 
-exports.registerEmployee = async (request, reply) => {
-  const { email, password, first_name, last_name, tenant_id, law_787_accepted, role } = request.body;
-
-  if (await checkIfUserExists(email)){
-    console.error(`User ${email} is already registered.`)
-    return reply.code(400).send({error: `User ${email} is already registered.`});
-  }
-
-  try {
-    const newEmployee = await Employee.create({
-      email,
-      first_name,
-      last_name,
-      password,
-      tenant_id,
-      role,
-      law_787_accepted,
-    });
-    return newEmployee;
-  } catch (error) {
-    request.log.error("Could not create new employee: ", error);
-    reply.code(500).send({ error: `Database error: ${error.message}` });
-  }
-};
-
-exports.registerCandidate = async (request, reply) => {
-  const { email, password, first_name, last_name, law_787_accepted } = request.body;
-
-  if (await checkIfUserExists(email)){
-    console.error(`User ${email} is already registered.`)
-    return reply.code(400).send({error: `User ${email} is already registered.`});
-  }
-
-  try {
-    const newCandidate = await Candidate.create({
-      email,
-      password,
-      first_name,
-      last_name,
-      law_787_accepted
-    });
-    return reply.code(201).send(`Successfully created candidate profile ${newCandidate.email}`);
-  } catch (error) {
-    request.log.error("Could not create new candidate: ", error);
-    reply.code(500).send({ error: `Database error: ${error.message}` });
-  }
-};
-
-exports.registerEmployee = async (request, reply) => {
-  const { email, password, first_name, last_name, tenant_id, law_787_accepted, role } = request.body;
-
-  // We will need a middleware to validate that data
-
-  const employeeObject = {
-    email,
-    first_name,
-    last_name,
-    password,
-    tenant_id,
-    role,
-    law_787_accepted,
-  };
-
-  try {
-    const newEmployee = await Employee.create(employeeObject);
-    return reply.code(201).send(`Successfully created employee profile ${newEmployee.email}`);
-  } catch (error) {
-    console.log("Could not create new employee: ", error);
-    reply.code(500).send({error: `Database error: ${error}`});
-  }
+exports.handleRegister = async (request, reply) => {
+  const { email, password, first_name, last_name, law_787_accepted, tenant_id, role, user_type } = request.body;
   
+  let createdUser;
+
+  if (!law_787_accepted) {
+    console.error("El usuario no a aceptado la ley 787")
+    return reply.code(400).send({error: "El usuario no a aceptado la ley 787"});
+  }
+
+  if (await checkIfUserExists(email)){
+    console.error(`Usuario con correo ${email} ya existe.`)
+    return reply.code(400).send({error: `Usuario con correo ${email} ya existe.`});
+  }
+
+  try {  
+    switch (user_type) {
+      // Logica para crear usuario Employee
+      case "employee":
+        // Validar tenant
+        const tenant = await Tenant.findOne({where: {id: tenant_id}});
+        if (!tenant) return reply.code(404).send({ message: `No se ha encontrado a la compañia con id ${tenant_id}`});
+        
+        try{
+          createdUser = await Employee.create({
+            email,
+            password,
+            first_name,
+            last_name,
+            law_787_accepted,
+            role,
+            tenant_id,
+        });
+      } catch (error){
+        console.log("Could not create new employee: ", error);
+        reply.code(500).send({error: `Database error: ${error}`});
+      }
+        break;
+
+      // Lógica para crear usuario candidate
+      case "candidate":
+        try {
+          createdUser = await Candidate.create({
+          email,
+          password,
+          first_name,
+          last_name,
+          law_787_accepted
+        });
+        } catch (error) {
+            request.log.error("Could not create new candidate: ", error);
+            reply.code(500).send({ error: `Database error: ${error.message}` });
+        }
+        break;
+
+      default :
+        return reply.code(400).send({message: "user type not found"});
+    }
+
+  return reply.code(201).send({
+      status: "success",
+      message: `Cuenta creada exitosamente para ${createdUser.email}`,
+      data: { 
+        id: createdUser.id, 
+        type: user_type,
+        organization: user_type === "employee" ? tenant_id : "N/A" 
+      }
+    });
+
+  } catch (error) {
+    request.log.error(error);
+    return reply.code(500).send({ error: "Error en en servidor al registrar usuario" });
+  }
 }
+
+

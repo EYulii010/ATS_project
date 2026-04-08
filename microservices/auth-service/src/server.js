@@ -1,5 +1,6 @@
 require('dotenv').config(); // 1. Carga las llaves del .env
 const { sequelize } = require('./models'); // 2. Trae la conexión de config/database.js 
+const authRoutes = require('./routes/authRoutes');
 
 // Añadier logger más bonito (pino-pretty)
 const fastify = require('fastify')({
@@ -22,7 +23,7 @@ fastify.register(require('@fastify/jwt'), {
 fastify.register(require('./plugins/authDecorator'));
 
 // 4. REGISTRO DE RUTAS
-fastify.register(require('./routes/authRoutes'));
+fastify.register(authRoutes, { prefix: '/api/v1/auth' });
 
 const args = process.argv.slice(2); // Get command line arguments
 
