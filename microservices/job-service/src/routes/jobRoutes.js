@@ -25,15 +25,16 @@ const updateDepartmentSchema = {
 const createJobSchema = {
   body: {
     type: 'object',
-    required: ['title'],
+    required: ['title', 'description', 'salary_min', 'salary_max', 'department_id'],
     properties: {
-      title:        { type: 'string', minLength: 1 },
-      description:  { type: 'string' },
-      requirements: { type: 'string' },
-      salary_min:   { type: 'number', minimum: 0 },
-      salary_max:   { type: 'number', minimum: 0 },
-      department_id:{ type: 'integer' },
-      closes_at:    { type: 'string', format: 'date-time' },
+      title:         { type: 'string', minLength: 1 },
+      description:   { type: 'string', minLength: 1 },
+      requirements:  { type: 'string' },
+      salary_min:    { type: 'number', minimum: 0 },
+      salary_max:    { type: 'number', minimum: 0 },
+      currency:      { type: 'string', default: 'NIO' },
+      department_id: { type: 'integer' },
+      closes_at:     { type: 'string', format: 'date-time' },
     },
   },
 };
@@ -42,14 +43,15 @@ const updateJobSchema = {
   body: {
     type: 'object',
     properties: {
-      title:        { type: 'string', minLength: 1 },
-      description:  { type: 'string' },
-      requirements: { type: 'string' },
-      salary_min:   { type: 'number', minimum: 0 },
-      salary_max:   { type: 'number', minimum: 0 },
-      department_id:{ type: 'integer' },
-      closes_at:    { type: 'string', format: 'date-time' },
-      status:       { type: 'string', enum: ['draft', 'published', 'paused', 'closed'] },
+      title:         { type: 'string', minLength: 1 },
+      description:   { type: 'string', minLength: 1 },
+      requirements:  { type: 'string' },
+      salary_min:    { type: 'number', minimum: 0 },
+      salary_max:    { type: 'number', minimum: 0 },
+      currency:      { type: 'string' },
+      department_id: { type: 'integer' },
+      closes_at:     { type: 'string', format: 'date-time' },
+      status:        { type: 'string', enum: ['draft', 'published', 'paused', 'closed'] },
     },
   },
 };
@@ -78,7 +80,7 @@ const publicJobsSchema = {
   },
 };
 
-async function jobRoutes(fastify, options) {
+async function jobRoutes(fastify, _options) {
   const authOnly   = [fastify.authenticate, fastify.requireEmployee];
   const authWrite  = [fastify.authenticate, fastify.requireEmployee, fastify.requireActiveSubscription];
 
@@ -89,6 +91,7 @@ async function jobRoutes(fastify, options) {
   fastify.delete('/departments/:id',{ preHandler: authWrite }, departmentController.deleteDepartment);
 
   // --- Vacantes (públicas, sin auth) ---
+  fastify.get('/jobs/public/:token', jobController.getJobByToken);
   fastify.get('/jobs/public', { schema: publicJobsSchema }, jobController.getPublicJobs);
 
   // --- Vacantes (privadas) ---

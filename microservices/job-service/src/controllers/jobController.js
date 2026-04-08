@@ -2,18 +2,21 @@ const { Job, Department } = require('../models');
 
 // POST /jobs
 exports.createJob = async (request, reply) => {
-  const { title, description, requirements, salary_min, salary_max, department_id, closes_at } = request.body;
+  const { title, description, requirements, salary_min, salary_max, currency, department_id, closes_at } = request.body;
   const tenant_id = request.user.company_id;
+  const created_by = request.user.id;
 
   try {
     const job = await Job.create({
       tenant_id,
       department_id,
+      created_by,
       title,
       description,
       requirements,
       salary_min,
       salary_max,
+      currency,
       closes_at,
       status: 'draft',
     });
@@ -70,13 +73,13 @@ exports.getJobById = async (request, reply) => {
 exports.updateJob = async (request, reply) => {
   const { id } = request.params;
   const tenant_id = request.user.company_id;
-  const { title, description, requirements, salary_min, salary_max, department_id, closes_at, status } = request.body;
+  const { title, description, requirements, salary_min, salary_max, currency, department_id, closes_at, status } = request.body;
 
   try {
     const job = await Job.findOne({ where: { id, tenant_id } });
     if (!job) return reply.code(404).send({ error: 'Vacante no encontrada.' });
 
-    await job.update({ title, description, requirements, salary_min, salary_max, department_id, closes_at, status });
+    await job.update({ title, description, requirements, salary_min, salary_max, currency, department_id, closes_at, status });
     return reply.send(job);
   } catch (error) {
     request.log.error(error);
@@ -95,6 +98,24 @@ exports.deleteJob = async (request, reply) => {
 
     await job.destroy();
     return reply.send({ message: 'Vacante eliminada.' });
+  } catch (error) {
+    request.log.error(error);
+    return reply.code(500).send({ error: `Database error: ${error.message}` });
+  }
+};
+
+// GET /jobs/public/:token  — job detail by public token (no auth, for application form)
+exports.getJobByToken = async (request, reply) => {
+  const { token } = request.params;
+
+  try {
+    const job = await Job.findOne({
+      where: { public_token: token, status: 'published' },
+      include: [{ model: Department, attributes: ['name'] }],
+      attributes: ['id', 'title', 'description', 'requirements', 'salary_min', 'salary_max', 'currency', 'closes_at', 'createdAt'],
+    });
+    if (!job) return reply.code(404).send({ error: 'Vacante no encontrada o no disponible.' });
+    return reply.send(job);
   } catch (error) {
     request.log.error(error);
     return reply.code(500).send({ error: `Database error: ${error.message}` });

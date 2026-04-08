@@ -1,7 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-// Posibles estados de una vacante
 const JOB_STATUSES = ['draft', 'published', 'paused', 'closed'];
 
 const Job = sequelize.define('Job', {
@@ -11,7 +10,12 @@ const Job = sequelize.define('Job', {
   },
   department_id: {
     type: DataTypes.INTEGER,
-    allowNull: true,
+    allowNull: false,
+  },
+  // App-level reference to auth_db.employees
+  created_by: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
   },
   title: {
     type: DataTypes.STRING,
@@ -19,7 +23,7 @@ const Job = sequelize.define('Job', {
   },
   description: {
     type: DataTypes.TEXT,
-    allowNull: true,
+    allowNull: false,
   },
   requirements: {
     type: DataTypes.TEXT,
@@ -27,11 +31,16 @@ const Job = sequelize.define('Job', {
   },
   salary_min: {
     type: DataTypes.DECIMAL(10, 2),
-    allowNull: true,
+    allowNull: false,
   },
   salary_max: {
     type: DataTypes.DECIMAL(10, 2),
-    allowNull: true,
+    allowNull: false,
+  },
+  currency: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 'NIO',
   },
   status: {
     type: DataTypes.ENUM(...JOB_STATUSES),
@@ -41,6 +50,13 @@ const Job = sequelize.define('Job', {
   closes_at: {
     type: DataTypes.DATE,
     allowNull: true,
+  },
+  // RF-12: unique token for public application link
+  public_token: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    allowNull: false,
+    unique: true,
   },
 }, {
   timestamps: true,
