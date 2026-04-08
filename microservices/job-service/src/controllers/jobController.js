@@ -68,13 +68,13 @@ exports.getJobById = async (request, reply) => {
 exports.updateJob = async (request, reply) => {
   const { id } = request.params;
   const tenant_id = request.user.company_id;
-  const updates = request.body;
+  const { title, description, requirements, salary_min, salary_max, department_id, closes_at, status } = request.body;
 
   try {
     const job = await Job.findOne({ where: { id, tenant_id } });
     if (!job) return reply.code(404).send({ error: 'Vacante no encontrada.' });
 
-    await job.update(updates);
+    await job.update({ title, description, requirements, salary_min, salary_max, department_id, closes_at, status });
     return reply.send(job);
   } catch (error) {
     request.log.error(error);
