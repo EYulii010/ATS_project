@@ -11,13 +11,14 @@
 
   --color-blue-dark: #4E6CF0;
   --color-blue-light: #6E88F7;
+  
   --color-teal-light: #6DC9D3;
   --color-teal-dark: #5BAEC0;
 
   /* Neutrals */
-  --color-applik-dark: #162A44; 
-  --color-applik-bg: #f6f7fa; /* El sidebar, por ejemplo */
-  --color-white: #ffffff; /* */
+  --color-applik-dark: #162A44; /* El sidebar, por ejemplo */ 
+  --color-applik-bg: #f6f7fa; /* Color para el fondo de main content */
+  --color-white: #ffffff; 
   
   /* Gradient utilities */
   --background-image-gradient-purple: linear-gradient(135deg, var(--color-purple-light), var(--color-purple-dark));
