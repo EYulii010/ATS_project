@@ -6,6 +6,10 @@ exports.createJob = async (request, reply) => {
   const tenant_id = request.user.company_id;
   const created_by = request.user.id;
 
+  if (salary_max < salary_min) {
+    return reply.code(400).send({ error: 'salary_max debe ser mayor o igual a salary_min.' });
+  }
+
   try {
     const job = await Job.create({
       tenant_id,
@@ -75,6 +79,12 @@ exports.updateJob = async (request, reply) => {
   const tenant_id = request.user.company_id;
   const { title, description, requirements, salary_min, salary_max, currency, department_id, closes_at, status } = request.body;
 
+  const effectiveMin = salary_min ?? undefined;
+  const effectiveMax = salary_max ?? undefined;
+  if (effectiveMin !== undefined && effectiveMax !== undefined && effectiveMax < effectiveMin) {
+    return reply.code(400).send({ error: 'salary_max debe ser mayor o igual a salary_min.' });
+  }
+
   try {
     const job = await Job.findOne({ where: { id, tenant_id } });
     if (!job) return reply.code(404).send({ error: 'Vacante no encontrada.' });
@@ -130,7 +140,7 @@ exports.getPublicJobs = async (request, reply) => {
     const { count, rows: jobs } = await Job.findAndCountAll({
       where: { tenant_id, status: 'published' },
       include: [{ model: Department, attributes: ['name'] }],
-      attributes: ['id', 'title', 'description', 'requirements', 'salary_min', 'salary_max', 'closes_at', 'createdAt'],
+      attributes: ['id', 'title', 'description', 'requirements', 'salary_min', 'salary_max', 'currency', 'closes_at', 'createdAt'],
       order: [['createdAt', 'DESC']],
       limit,
       offset,

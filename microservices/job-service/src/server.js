@@ -24,16 +24,21 @@ fastify.register(require('./plugins/authDecorator'));
 fastify.register(require('./routes/jobRoutes'));
 
 const args = process.argv.slice(2);
+const isProd = process.env.NODE_ENV === 'production';
 
 const start = async () => {
   try {
+    await sequelize.authenticate();
+    console.log('Conexión a la DB establecida correctamente.');
+
     if (args.includes('--alter')) {
+      if (isProd) {
+        console.error('ERROR: --alter no está permitido en producción.');
+        process.exit(1);
+      }
       await sequelize.sync({ alter: true });
       console.log('Base de datos actualizada.');
     }
-
-    await sequelize.authenticate();
-    console.log('Conexión a la DB establecida correctamente.');
 
     const port = process.env.PORT || 3003;
     await fastify.listen({ port });
