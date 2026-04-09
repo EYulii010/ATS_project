@@ -114,9 +114,15 @@ exports.deleteJob = async (request, reply) => {
   }
 };
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 // GET /jobs/public/:token  — job detail by public token (no auth, for application form)
 exports.getJobByToken = async (request, reply) => {
   const { token } = request.params;
+
+  if (!UUID_REGEX.test(token)) {
+    return reply.code(404).send({ error: 'Vacante no encontrada o no disponible.' });
+  }
 
   try {
     const job = await Job.findOne({
