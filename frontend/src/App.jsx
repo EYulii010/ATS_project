@@ -1,29 +1,60 @@
 import { useState } from 'react'
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import MainLayout from './components/layout/MainLayout';
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
 import './App.css'
+import { AuthProvider, useAuth } from './context/AuthContext';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+
+// Componente temporal para testing de sesión no más
+const TestLogin = () => {
+  const { login } = useAuth();
+  const navigate  = useNavigate(); 
+
+  const handleLogin = () => {
+    console.log("Iniciando sesion como Octavio Ramírez")
+    login("recruiter");
+    navigate('/');
+  }
+
+  return (
+    <div className='flex flex-col  m-10'>
+      <div>Página de Inicio</div>
+      <button className=' bg-blue-dark px-1 py-0.5 w-32' onClick={handleLogin}>Iniciar Sesión</button>
+    </div>
+  );
+}
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
-      <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-2xl ring-1 ring-slate-200">
-        <h1 className="text-4xl font-extrabold tracking-tight text-blue-600">
-          APPLIK
-        </h1>
-        <p className="mt-4 text-lg text-slate-600">
-          AI-Driven Recruitment for Nicaragua. 
-          <span className="block font-semibold text-applik-accent">
-            Frontend Environment: ACTIVE
-          </span>
-        </p>
-        <button className="mt-6 w-full rounded-lg bg-blue-600 py-3 font-bold text-white transition-hover hover:bg-blue-700">
-          Enter Dashboard
-        </button>
-      </div>
-    </div>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* 1. */}
+          <Route path='/login' element={<TestLogin />}></Route>
+
+          <Route 
+            path='/' 
+            element={
+              <ProtectedRoute>
+                <MainLayout/>
+              </ProtectedRoute>
+            }
+          >
+            <Route path='dashboard' element={<div>Panel Principal aquí</div>}></Route>
+            <Route path='vacantes' element={<div>Vacantes aquí</div>}></Route>
+            <Route path='candidatos' element={<div>Candidatos aquí</div>}></Route>
+            <Route path='estadistica' element={<div>Estadística aquí</div>}></Route>
+            <Route path='configuracion' element={<div>Configuración aquí</div>}></Route>
+            <Route index element={<div>Página de Inicio</div>} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+      </AuthProvider>
   )
 }
 
