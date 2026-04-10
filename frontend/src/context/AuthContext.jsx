@@ -21,10 +21,12 @@ export const AuthProvider = ({ children }) => {
     const [ loading, setLoading ] = useState(false); // False porque localstorage ya es instantaneo
 
     const login = (role) => {
-        // Usuario falso, temporal para testing. Reemplazar por datos de Auth
+        // Usuario falso, temporal para testing. Reemplazar por datos de Token + DB
+
         const loggedUser = {
             id: 777,
             name: "Octavio Ramírez", // No está realmente en el token, necesitaría otra lógica
+            email: "o.ramirez@gmail.com",
             role: role,
             tenant_id: 1
         };
