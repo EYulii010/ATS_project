@@ -100,7 +100,7 @@ export default function VacantesPage() {
                     <td className="py-3">
                       <button
                         onClick={() => abrirDetalles(v)}
-                        className="text-left hover:text-blue-dark transition-colors"
+                        className="text-left cursor-pointer hover:text-blue-dark transition-colors"
                       >
                         <p className="font-medium text-slate-800">{v.titulo}</p>
                         <p className="text-xs text-slate-400">Publicado {v.fechaPublicacion}</p>
