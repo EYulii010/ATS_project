@@ -19,7 +19,7 @@ const Header = () => {
             {/* Derecha: Usuario y notificaciones */}
             <div className="flex items-center gap-4">
                 {/* Hace falta la funcionalidad */}
-                <Link className="group relative transition-transform duration-200 active-scale-95 hover:bg-slate-100 p-2 rounded-full">
+                <Link className="group relative transition-transform duration-200 active:scale-95 hover:bg-slate-100 p-2 rounded-full">
                     <Bell className="w-7 h-7"/>
                 </Link>
                 <Link 
