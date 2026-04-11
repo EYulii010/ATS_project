@@ -28,7 +28,8 @@ export const AuthProvider = ({ children }) => {
             name: "Octavio Ramírez", // No está realmente en el token, necesitaría otra lógica
             email: "o.ramirez@gmail.com",
             role: role,
-            tenant_id: 1
+            tenant_id: 1,
+            tenant_name: "Coca-Cola Inc.",
         };
         localStorage.setItem('applik_user', JSON.stringify(loggedUser));
         setUser(loggedUser);    

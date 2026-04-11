@@ -1,18 +1,23 @@
 import { Outlet, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import  Sidebar  from "./Sidebar";
+import Header from "./Header";
 
 const MainLayout = () => {
     const { user, logout } = useAuth();
 
     return (
         <div className="flex h-screen bg-applik-bg">
-            {/* SIDEBAR: Falta estilo y indicador <<you are here>> */}
+            {/* SIDEBAR: */}
             <Sidebar />
-        {/* Content Area */}
-        <main className="flex-1 p-8 overflow-y-auto">
-            <Outlet />
-        </main>
+            {/* Content Area */}
+            <div className="flex-1 flex flex-col min-h-screen"> 
+                <Header />
+                <main className="flex-1 p-8 overflow-y-auto">
+                    <Outlet />
+                </main>
+                {/* Footer puede ir aca */}
+            </div>
         </div>
     );
 }

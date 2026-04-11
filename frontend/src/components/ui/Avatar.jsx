@@ -5,7 +5,7 @@ const gradients = [
   "from-blue-dark to-teal-light",
   "from-purple-dark to-blue-dark",
   "from-teal-dark to-blue-light",
-  "from-purple-ligth to-purple-dark",
+  "from-purple-light to-purple-dark",
 ]
 
 function getInitials(name = "") {

@@ -29,7 +29,7 @@ const Sidebar = () => {
                     Vacantes
                 </NavLink>
                 <NavLink to="/candidatos" className={navLinkClass}>
-                    <Users className="w-5 h-5"/>
+                    <Users className="w-5 h-5"/>    
                     Candidatos
                 </NavLink>   
                 <NavLink to="/estadistica" className={navLinkClass}>
