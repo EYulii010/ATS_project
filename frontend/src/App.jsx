@@ -10,26 +10,11 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import VacantesPage from './pages/Vacantes/VacantesPage';
 import CandidatosPage from './pages/Candidatos/CandidatosPage';
 import PanelPrincipalPage from './pages/PanelPrincipal/PanelPrincipalPage';
-import ConfiguracionPage from './pages/Configuracion/ConfiguracionPage';
+import ApplicantLayout from './components/layout/ApplicantLayout/ApplicantLayout';import ConfiguracionPage from './pages/Configuracion/ConfiguracionPage';
 
-// Componente temporal para testing de sesión no más
-const TestLogin = () => {
-  const { login } = useAuth();
-  const navigate  = useNavigate(); 
-
-  const handleLogin = () => {
-    console.log("Iniciando sesion como Octavio Ramírez")
-    login("recruiter");
-    navigate('/');
-  }
-
-  return (
-    <div className='flex flex-col  m-10'>
-      <div>Página de Inicio</div>
-      <button className=' bg-blue-dark px-1 py-0.5 w-32' onClick={handleLogin}>Iniciar Sesión</button>
-    </div>
-  );
-}
+// Componentes temporales para testing de sesión no más
+import TestLogin from './pages/TestLogin';
+import PerfilPage from './pages/PortalAplicantes/PerfilPage';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -37,14 +22,31 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Routes>
-          {/* 1. */}
-          <Route path='/login' element={<TestLogin />}></Route>
+        <Routes >
+          {/* Portal de aplicante: Público */}
+          <Route element={<ApplicantLayout />}>
+            <Route index element={<div>Inicio aquí</div>} />
+            <Route path='/trabajos' element={<div>Bolsa de trabajo aquí</div>}/>
+            <Route path='/trabajo/:id' element={<div>Detalles de trabajo aquí</div>} />
+            {/* ↑ Detalles de Aplicación podría ser un modal en lugar de página */}
+            <Route path='/login' element={<TestLogin/>} />
+            <Route path='/registro' element={<div>Registro aquí</div>}/>
+            {/* Register para empresas, redirige loggeado como admin a /dashboard */}
+            <Route path='/registrar-empresa' element={<div>Registro empresa aquí</div>}/>
+            {/* Ruta protegida para página de perfil */}
+            <Route element={<ProtectedRoute allowedRoles={["aplicante", "reclutador", "admin"]} />}>
+              <Route path='/perfil' element={<PerfilPage />} />
+              <Route path='/aplicaciones' element={<div>Aplicaciones aquí</div>}/>
+            </Route> 
+          </Route>
 
+          
+
+          {/* Dashboard de reclutador: Protegido */}
           <Route 
             path='/' 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={["reclutador", "admin"]}>
                 <MainLayout/>
               </ProtectedRoute>
             }
@@ -56,6 +58,9 @@ function App() {
             <Route path='configuracion' element={<ConfiguracionPage />}></Route>
             <Route index element={<div>Página de Inicio</div>} />
           </Route>
+
+            {/* Crear página de Not Found  */}
+          <Route path='*' element={<div>Not Found aquí</div>}/>
         </Routes>
       </BrowserRouter>
       </AuthProvider>

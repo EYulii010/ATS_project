@@ -26,6 +26,7 @@
   --color-applik-bg: #f6f7fa; /* Color para el fondo de main content */
   --color-white: #ffffff; 
   --color-applik-navy: #1e3a65; /* Color del sidebar */ 
+  --color-applik-selected: #dedbfa;
 
   /* Gradient utilities */
   --background-image-gradient-purple: linear-gradient(90deg, var(--color-purple-light), var(--color-purple-dark));
