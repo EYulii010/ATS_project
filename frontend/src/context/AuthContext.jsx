@@ -20,20 +20,11 @@ export const AuthProvider = ({ children }) => {
     // Estado de carga para evitar race condition para ProtectedRoute
     const [ loading, setLoading ] = useState(false); // False porque localstorage ya es instantaneo
 
-    const login = (role) => {
-        // Usuario falso, temporal para testing. Reemplazar por datos de Token + DB
-
-        const loggedUser = {
-            id: 777,
-            name: "Octavio Ramírez", // No está realmente en el token, necesitaría otra lógica
-            email: "o.ramirez@gmail.com",
-            role: role,
-            tenant_id: 1,
-            tenant_name: "Coca-Cola Inc.",
-        };
-        localStorage.setItem('applik_user', JSON.stringify(loggedUser));
-        setUser(loggedUser);    
-    } 
+    const login = (userData) => {
+        // Almacenamos el objeto completo que pasamos desde los botones
+        localStorage.setItem('applik_user', JSON.stringify(userData));
+        setUser(userData);    
+    };
 
     const logout = () => {
         localStorage.removeItem("applik_user");

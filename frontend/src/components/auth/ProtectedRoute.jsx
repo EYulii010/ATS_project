@@ -1,7 +1,8 @@
 import { useAuth } from "../../context/AuthContext";
 import { Navigate } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 
-const ProtectedRoute = ({children}) => {
+const ProtectedRoute = ({ children, allowedRoles }) => {
     const { user, loading } = useAuth();
 
     if (loading) return <div>Cargando...</div>;
@@ -11,9 +12,14 @@ const ProtectedRoute = ({children}) => {
         return (
             <Navigate to="/login" />
         );
-    } else {
-        return children;
+    } 
+
+    if (allowedRoles && !allowedRoles.includes(user.role)) {
+        console.log(`Acceso denegado: El rol: ${user.role} no tiene permiso`);
+        return <Navigate to={user.role === "reclutador" ? "/dashboard" : "/"} replace />
     }
+
+    return children ? children : <Outlet />;
 }
 
 export default ProtectedRoute;
