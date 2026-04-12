@@ -26,7 +26,7 @@ export function CardHeader({ className, children }) {
 
 export function CardContent({ className, children }) {
   return (
-    <div className={cn("px-5 pb-5", className)}>
+    <div className={cn("px-5 py-5", className)}>
       {children}
     </div>
   )

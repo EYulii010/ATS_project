@@ -8,6 +8,7 @@ import './App.css'
 import { AuthProvider, useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import VacantesPage from './pages/Vacantes/VacantesPage';
+import CandidatosPage from './pages/Candidatos/CandidatosPage';
 
 // Componente temporal para testing de sesión no más
 const TestLogin = () => {
@@ -48,7 +49,7 @@ function App() {
           >
             <Route path='dashboard' element={<div>Panel Principal aquí</div>}></Route>
             <Route path='vacantes' element={<VacantesPage />}></Route>
-            <Route path='candidatos' element={<div>Candidatos aquí</div>}></Route>
+            <Route path='candidatos' element={<CandidatosPage />}></Route>
             <Route path='estadistica' element={<div>Estadística aquí</div>}></Route>
             <Route path='configuracion' element={<div>Configuración aquí</div>}></Route>
             <Route index element={<div>Página de Inicio</div>} />
