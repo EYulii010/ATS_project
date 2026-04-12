@@ -10,6 +10,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import VacantesPage from './pages/Vacantes/VacantesPage';
 import CandidatosPage from './pages/Candidatos/CandidatosPage';
 import PanelPrincipalPage from './pages/PanelPrincipal/PanelPrincipalPage';
+import ConfiguracionPage from './pages/Configuracion/ConfiguracionPage';
 
 // Componente temporal para testing de sesión no más
 const TestLogin = () => {
@@ -52,7 +53,7 @@ function App() {
             <Route path='vacantes' element={<VacantesPage />}></Route>
             <Route path='candidatos' element={<CandidatosPage />}></Route>
             <Route path='estadistica' element={<div>Estadística aquí</div>}></Route>
-            <Route path='configuracion' element={<div>Configuración aquí</div>}></Route>
+            <Route path='configuracion' element={<ConfiguracionPage />}></Route>
             <Route index element={<div>Página de Inicio</div>} />
           </Route>
         </Routes>

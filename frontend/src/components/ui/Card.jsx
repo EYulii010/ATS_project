@@ -55,9 +55,9 @@ export function ConfigCard({ icon: Icon, title, description, onClick, active = f
     <button
       onClick={onClick}
       className={cn(
-        "w-full rounded-xl bg-white border p-5 text-left shadow-sm",
+        "w-full rounded-xl bg-white border p-5 text-left shadow-sm cursor-pointer",
         "flex items-center gap-4",
-        "transition-colors hover:border-purple-dark/40",
+        "transition-all hover:border-purple-dark/40 hover:shadow-md",
         active ? "border-purple-dark" : "border-slate-100"
       )}
     >
