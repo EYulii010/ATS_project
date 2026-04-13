@@ -7,7 +7,7 @@ async function authRoutes(fastify, options) {
   fastify.post('/login', authController.handleLogin);
 
   // Ruta para registrar usuario. OJO: Requiere un campo user_type en el body
-  fastify.post('/register', authController.handleRegister);
+  fastify.post('/register', authController.handleRegisterApplicant);
 
   // Aquí agregaremos los TO-DOs:
   fastify.post('/organizations/register', authController.handleRegisterOrganization);

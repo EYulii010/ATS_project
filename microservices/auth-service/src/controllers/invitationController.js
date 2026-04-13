@@ -104,8 +104,6 @@ exports.handleAcceptInvitation = async (request, reply) => {
     const validateEmailRegex = /^\S+@\S+\.\S+$/;
 
     const transaction = await sequelize.transaction();
-
-    
     
     try{
         if (!law_787_accepted){

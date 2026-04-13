@@ -48,83 +48,60 @@ exports.handleLogin = async (request, reply) => {
   }
 };
 
-exports.handleRegister = async (request, reply) => {
-  const { email, password, first_name, last_name, law_787_accepted, tenant_id, role, user_type } = request.body;
-  
-  let createdUser;
-
-  if (!law_787_accepted) {
-    console.error("El usuario no a aceptado la ley 787")
-    return reply.code(400).send({error: "El usuario no ha aceptado la ley 787"});
-  }
-
-  if (await checkIfUserExists(email)){
-    console.error(`Usuario con correo ${email} ya existe.`)
-    return reply.code(400).send({error: `Usuario con correo ${email} ya existe.`});
-  }
+exports.handleRegisterApplicant = async (request, reply) => {
+  const { email, password, first_name, last_name, law_787_accepted } = request.body;
 
   try {  
-    switch (user_type) {
-      // Logica para crear usuario Employee
-      case "employee":
-        // Validar tenant
-        const tenant = await Tenant.findOne({where: {id: tenant_id}});
-        if (!tenant) return reply.code(404).send({ message: `No se ha encontrado a la compañia con id ${tenant_id}`});
-        
-        try{
-          createdUser = await Employee.create({
-            email,
-            password,
-            first_name,
-            last_name,
-            law_787_accepted,
-            role,
-            tenant_id,
-        });
-      } catch (error){
-        console.log("Could not create new employee: ", error);
-        reply.code(500).send({error: `Database error: ${error}`});
-      }
-        break;
-
-      // Lógica para crear usuario candidate
-      case "candidate":
-        try {
-          createdUser = await Candidate.create({
-          email,
-          password,
-          first_name,
-          last_name,
-          law_787_accepted
-        });
-        } catch (error) {
-            request.log.error("Could not create new candidate: ", error);
-            reply.code(500).send({ error: `Database error: ${error.message}` });
-        }
-        break;
-
-      default :
-        return reply.code(400).send({message: "user type not found"});
+    if (!law_787_accepted) {
+      console.error("El usuario no a aceptado la ley 787")
+      return reply.code(400).send({error: "El usuario no ha aceptado la ley 787"});
     }
 
-  const payload = {
-    user_id: createdUser.id,
-    role: "aplicante"
-  }
+    if (await checkIfUserExists(email)){
+      console.error(`Usuario con correo ${email} ya existe.`)
+      return reply.code(400).send({error: `Usuario con correo ${email} ya existe.`});
+    }
 
-  return reply.code(201).send({
-      status: "success",
-      message: `Cuenta creada exitosamente para ${createdUser.email}`,
-      data: { 
-        id: createdUser.id, 
-        type: user_type,
-        organization: user_type === "employee" ? tenant_id : "N/A" 
+    const createdApplicant = await Candidate.create({
+      email,
+      password,
+      first_name,
+      last_name,
+      law_787_accepted
+    });
+
+    const payload = {
+      user_id: createdApplicant.id,
+      role: "aplicante",
+      active_subscription: null, 
+      company_id: null,
+    }
+
+    const jwtToken = await reply.jwtSign(payload);
+
+    const sessionExpiry = new Date();
+    sessionExpiry.setHours(sessionExpiry.getHours() + 8);
+
+    await Session.create({
+        token: jwtToken,
+        candidate_id: createdApplicant.id,
+        expires_at: sessionExpiry
+    });
+
+    return reply.code(201).send({
+      success: true,
+      message: `Se creó al usuario aplicante: ${createdApplicant.id}`,
+      data: {
+        user_id: createdApplicant.id,
+        token: jwtToken
       }
     });
 
   } catch (error) {
-    request.log.error(error);
-    return reply.code(500).send({ error: "Error en en servidor al registrar usuario" });
+    return reply.code(500).send({
+      success: false,
+      message: `Algo salió mal al crear nuevo aplicante: ${error}`
+    });
   }
 }
 
