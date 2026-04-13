@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const dotenv = require('dotenv').config()
 const { Employee, Candidate, Tenant, sequelize } = require('../models');
-const { hashPassword, verifyPassword } = require('../utils/passwordUtils');
+const { verifyPassword } = require('../utils/passwordUtils');
 const { validateNicaraguanRUC } = require('../utils/validationUtils');
 
 const checkIfUserExists = async (email) => {
@@ -10,7 +10,7 @@ const checkIfUserExists = async (email) => {
   if (employee) return true;
 
   const candidate = await Candidate.findOne({ where: { email } });
-  // Retorna true si se encuentra al user en cualquiera de las dos;
+  // Retorna true si se encuentra al user en cualquiera de las dos; 
   return !!candidate; 
 };
 
@@ -188,13 +188,11 @@ exports.handleRegisterOrganization = async (request, reply) => {
     }, {transaction});
     
     // Crear usuario admin
-    const hashedPassword = await hashPassword(password);
-
     const createdAdmin = await Employee.create({
       email: adminEmail,
       first_name,
       last_name,
-      password: hashedPassword,
+      password,
       tenant_id: createdTenant.id,
       role: "admin",
       law_787_accepted
