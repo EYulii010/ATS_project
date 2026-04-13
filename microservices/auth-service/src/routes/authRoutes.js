@@ -9,6 +9,7 @@ async function authRoutes(fastify, options) {
   fastify.post('/register', authController.handleRegister);
 
   // Aquí agregaremos los TO-DOs:
+  fastify.post('/organizations/register', authController.handleRegisterOrganization);
   // fastify.get('/tenants/:id', authController.getTenantById);
 }
 

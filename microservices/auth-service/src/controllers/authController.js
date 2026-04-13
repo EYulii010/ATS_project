@@ -1,5 +1,8 @@
 const bcrypt = require('bcrypt');
-const { Employee, Candidate, Tenant } = require('../models');
+const dotenv = require('dotenv').config()
+const { Employee, Candidate, Tenant, sequelize } = require('../models');
+const { hashPassword, verifyPassword } = require('../utils/passwordUtils');
+const { validateNicaraguanRUC } = require('../utils/validationUtils');
 
 const checkIfUserExists = async (email) => {
   // Busca el email en ambos tipos de usuario
@@ -10,6 +13,8 @@ const checkIfUserExists = async (email) => {
   // Retorna true si se encuentra al user en cualquiera de las dos;
   return !!candidate; 
 };
+
+// Se necesitan middleware para validación de inputs.
 
 exports.handleLogin = async (request, reply) => {
   const { email, password } = request.body;
@@ -32,7 +37,7 @@ exports.handleLogin = async (request, reply) => {
       isSubscriptionActive = tenant.active_subscription;
     }
 
-    const isMatch = await bcrypt.compare(password + pepper, user.password);
+    const isMatch = await verifyPassword(password, user.password)
 
     if (isMatch) {
       // Payload se define aquí !!!
@@ -59,7 +64,7 @@ exports.handleRegister = async (request, reply) => {
 
   if (!law_787_accepted) {
     console.error("El usuario no a aceptado la ley 787")
-    return reply.code(400).send({error: "El usuario no a aceptado la ley 787"});
+    return reply.code(400).send({error: "El usuario no ha aceptado la ley 787"});
   }
 
   if (await checkIfUserExists(email)){
@@ -111,6 +116,11 @@ exports.handleRegister = async (request, reply) => {
         return reply.code(400).send({message: "user type not found"});
     }
 
+  const payload = {
+    user_id: createdUser.id,
+    role: "aplicante"
+  }
+
   return reply.code(201).send({
       status: "success",
       message: `Cuenta creada exitosamente para ${createdUser.email}`,
@@ -127,4 +137,98 @@ exports.handleRegister = async (request, reply) => {
   }
 }
 
+// Manejando registro de empresas
 
+exports.handleRegisterOrganization = async (request, reply) => {
+  const { businessName, subscriptionPlan, RUC, adminEmail, first_name, last_name, password, law_787_accepted} = request.body;
+
+  // Validación de input:
+
+  // Validar RUC
+  const rucMatch = await Tenant.findOne({where: { RUC }});
+  
+  if (!validateNicaraguanRUC(RUC)) {
+    return reply.code(400).send({
+        success: false,
+        message: "El formato del RUC es inválido. Debe comenzar con 'J' seguido de 13 dígitos para empresas."
+    });
+
+  if (rucMatch){
+    return reply.code(409).send({
+      success: false,
+      message: `Este RUC ya se encuentra registrado.`
+    })
+  }
+
+}
+  // Validar Email único
+  if (await checkIfUserExists(adminEmail)){
+    console.error(`Usuario con correo ${adminEmail} ya existe.`)
+    return reply.code(400).send({
+      success: false,
+      message: `Usuario con correo ${adminEmail} ya existe.`});
+  }
+  // Validar ley aceptada
+  if (!law_787_accepted) {
+    console.error("El usuario admin no a aceptado la ley 787")
+    return reply.code(400).send({
+      success: false,
+      message: "El usuario admin no ha aceptado la ley 787"});
+  }
+
+  const transaction = await sequelize.transaction();
+
+  try {
+    // Crear tenant
+    const createdTenant = await Tenant.create({
+      business_name: businessName,
+      subscription_plan: 'básico', // hardcoded para demo
+      RUC,
+      active_subscription: true, // hardcoded para demo
+    }, {transaction});
+    
+    // Crear usuario admin
+    const hashedPassword = await hashPassword(password);
+
+    const createdAdmin = await Employee.create({
+      email: adminEmail,
+      first_name,
+      last_name,
+      password: hashedPassword,
+      tenant_id: createdTenant.id,
+      role: "admin",
+      law_787_accepted
+    }, {transaction: transaction});
+    
+    await transaction.commit();
+    
+    // creando token para iniciar sesión del admin
+
+    const payload = {
+      user_id: createdAdmin.id,
+      role: createdAdmin.role,
+      company_id: createdTenant.id,
+      active_subscription: createdTenant.active_subscription
+    }
+
+    const token = await reply.jwtSign(payload)
+
+    reply.code(201).send({
+      success: true,
+      message: `Se creó compañía: ${createdTenant.id} con usuario admin: ${createdAdmin.id}`,
+      data: {
+        tenant_id: createdTenant.id,
+        admin_id: createdAdmin.id,
+        token: token 
+      }
+    });
+
+
+  } catch (error) {
+    await transaction.rollback();
+    reply.code(500).send({
+      success: false,
+      message: `Error al registrar empresa, abortando cambios: ${error}`
+    });
+  }
+}
