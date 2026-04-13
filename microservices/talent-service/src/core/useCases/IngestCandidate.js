@@ -3,7 +3,7 @@ const { CandidateProfile, WorkExperience, Education, Skill, CandidateSkill } = r
 const sequelize = require('../../infrastructure/database/sequelize');
 const fs = require('fs');
 const path = require('path');
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 
 class IngestCandidateUseCase {
 
@@ -37,7 +37,7 @@ class IngestCandidateUseCase {
             // 2.5 Generar Vector Semántico del Perfil
             // Se obtiene el array (vector) del AI Bridge
             const embeddingVector = await aiClient.getEmbedding(rawCvText);
-            const mockVectorId = embeddingVector ? `em_local_${uuidv4().substring(0, 8)}` : null;
+            const mockVectorId = embeddingVector ? `em_local_${crypto.randomUUID().substring(0, 8)}` : null;
 
             // 3. Crear el Perfil Raíz
             const profile = await CandidateProfile.create({

@@ -22,16 +22,16 @@ module.exports = fp(async function (fastify, opts) {
             }
 
             const token = authHeader.replace('Bearer ', '');
-            
+
             // Decodificamos validando contra el mismo JWT_SECRET que usa auth-service
             const decoded = jwt.verify(token, process.env.JWT_SECRET || 'test-secret');
-            
-            if (!decoded.tenant_id) {
-                return reply.code(403).send({ error: 'Token inválido: falta tenant_id, restricción de aislamiento vulnerada.' });
+
+            if (!decoded.company_id) {
+                return reply.code(403).send({ error: 'Token inválido: falta company_id, restricción de aislamiento vulnerada.' });
             }
 
-            request.tenantId = decoded.tenant_id;
-            request.user = decoded; // ej. { userId: 1, role: 'recruiter', tenant_id: 10 }
+            request.tenantId = decoded.company_id;
+            request.user = decoded; // ej. { userId: 1, role: 'recruiter', company_id: 10 }
         } catch (err) {
             request.log.error('Fallo en la autenticación / integridad del Tenant:', err);
             return reply.code(401).send({ error: 'Autorización Denegada o Expirada.' });
