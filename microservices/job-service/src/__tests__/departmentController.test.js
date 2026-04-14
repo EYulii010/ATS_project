@@ -77,6 +77,35 @@ describe('getDepartments', () => {
 });
 
 // ---------------------------------------------------------------------------
+// getDepartmentById
+// ---------------------------------------------------------------------------
+describe('getDepartmentById', () => {
+  test('returns the department when found', async () => {
+    const fakeDept = { id: 1, name: 'Tecnología' };
+    Department.findOne.mockResolvedValue(fakeDept);
+
+    const req = makeRequest({ params: { id: 1 } });
+    const reply = makeReply();
+
+    await departmentController.getDepartmentById(req, reply);
+
+    expect(Department.findOne).toHaveBeenCalledWith({ where: { id: 1, tenant_id: 1 } });
+    expect(reply.send).toHaveBeenCalledWith(fakeDept);
+  });
+
+  test('returns 404 when department does not exist', async () => {
+    Department.findOne.mockResolvedValue(null);
+
+    const req = makeRequest({ params: { id: 999 } });
+    const reply = makeReply();
+
+    await departmentController.getDepartmentById(req, reply);
+
+    expect(reply.code).toHaveBeenCalledWith(404);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // updateDepartment
 // ---------------------------------------------------------------------------
 describe('updateDepartment', () => {

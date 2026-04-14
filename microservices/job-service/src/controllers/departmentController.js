@@ -27,6 +27,21 @@ exports.getDepartments = async (request, reply) => {
   }
 };
 
+// GET /departments/:id
+exports.getDepartmentById = async (request, reply) => {
+  const { id } = request.params;
+  const tenant_id = request.user.company_id;
+
+  try {
+    const department = await Department.findOne({ where: { id, tenant_id } });
+    if (!department) return reply.code(404).send({ error: 'Departamento no encontrado.' });
+    return reply.send(department);
+  } catch (error) {
+    request.log.error(error);
+    return reply.code(500).send({ error: `Database error: ${error.message}` });
+  }
+};
+
 // PATCH /departments/:id
 exports.updateDepartment = async (request, reply) => {
   const { id } = request.params;

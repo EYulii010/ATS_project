@@ -15,7 +15,6 @@ const createDepartmentSchema = {
 const updateDepartmentSchema = {
   body: {
     type: 'object',
-    required: ['name'],
     properties: {
       name: { type: 'string', minLength: 1 },
     },
@@ -86,8 +85,9 @@ async function jobRoutes(fastify, _options) {
 
   // --- Departamentos ---
   fastify.post('/departments',      { schema: createDepartmentSchema, preHandler: authWrite }, departmentController.createDepartment);
-  fastify.get('/departments',       { preHandler: authOnly }, departmentController.getDepartments);
-  fastify.patch('/departments/:id', { schema: updateDepartmentSchema, preHandler: authWrite }, departmentController.updateDepartment);
+  fastify.get('/departments',        { preHandler: authOnly }, departmentController.getDepartments);
+  fastify.get('/departments/:id',    { preHandler: authOnly }, departmentController.getDepartmentById);
+  fastify.patch('/departments/:id',  { schema: updateDepartmentSchema, preHandler: authWrite }, departmentController.updateDepartment);
   fastify.delete('/departments/:id',{ preHandler: authWrite }, departmentController.deleteDepartment);
 
   // --- Vacantes (públicas, sin auth) ---
