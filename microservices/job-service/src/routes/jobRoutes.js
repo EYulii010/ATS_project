@@ -98,9 +98,21 @@ async function jobRoutes(fastify, _options) {
   fastify.get('/jobs/stats',  { preHandler: authOnly }, jobController.getStats);
   fastify.post('/jobs',       { schema: createJobSchema, preHandler: authWrite }, jobController.createJob);
   fastify.get('/jobs',        { schema: getJobsSchema, preHandler: authOnly }, jobController.getJobs);
-  fastify.get('/jobs/:id',    { preHandler: authOnly }, jobController.getJobById);
-  fastify.patch('/jobs/:id',  { schema: updateJobSchema, preHandler: authWrite }, jobController.updateJob);
-  fastify.delete('/jobs/:id', { preHandler: authWrite }, jobController.deleteJob);
+  fastify.get('/jobs/:id',             { preHandler: authOnly }, jobController.getJobById);
+  fastify.patch('/jobs/:id',           { schema: updateJobSchema, preHandler: authWrite }, jobController.updateJob);
+  fastify.delete('/jobs/:id',          { preHandler: authWrite }, jobController.deleteJob);
+  fastify.post('/jobs/:id/ai-generate', {
+    schema: {
+      body: {
+        type: 'object',
+        required: ['companyUrl'],
+        properties: {
+          companyUrl: { type: 'string', format: 'uri' },
+        },
+      },
+    },
+    preHandler: authWrite,
+  }, jobController.aiGenerateDescription);
 }
 
 module.exports = jobRoutes;

@@ -1,5 +1,8 @@
 'use strict';
 
+jest.mock('axios');
+const axios = require('axios');
+
 jest.mock('../models', () => ({
   Job: {
     create: jest.fn(),
@@ -308,6 +311,72 @@ describe('getPublicJobs', () => {
     expect(reply.send).toHaveBeenCalledWith(
       expect.objectContaining({ total: 1 })
     );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// aiGenerateDescription
+// ---------------------------------------------------------------------------
+describe('aiGenerateDescription', () => {
+  test('calls AI service, updates description, and returns the job', async () => {
+    const fakeJob = { id: 1, title: 'Dev Backend', update: jest.fn().mockResolvedValue(true) };
+    Job.findOne.mockResolvedValue(fakeJob);
+    axios.post.mockResolvedValue({ data: { data: 'Descripción generada por IA.' } });
+
+    const req = makeRequest({
+      params: { id: 1 },
+      body: { companyUrl: 'https://empresa.com/cultura' },
+    });
+    req.headers = { authorization: 'Bearer test-token' };
+    const reply = makeReply();
+
+    await jobController.aiGenerateDescription(req, reply);
+
+    expect(axios.post).toHaveBeenCalledWith(
+      expect.stringContaining('/api/v1/jobs/generate-description'),
+      { jobTitle: fakeJob.title, companyUrl: 'https://empresa.com/cultura' },
+      expect.objectContaining({ headers: { Authorization: 'Bearer test-token' } })
+    );
+    expect(fakeJob.update).toHaveBeenCalledWith({ description: 'Descripción generada por IA.' });
+    expect(reply.send).toHaveBeenCalledWith(
+      expect.objectContaining({ message: expect.stringContaining('exitosamente') })
+    );
+  });
+
+  test('returns 404 when job does not exist', async () => {
+    Job.findOne.mockResolvedValue(null);
+
+    const req = makeRequest({
+      params: { id: 999 },
+      body: { companyUrl: 'https://empresa.com/cultura' },
+    });
+    req.headers = { authorization: 'Bearer test-token' };
+    const reply = makeReply();
+
+    await jobController.aiGenerateDescription(req, reply);
+
+    expect(axios.post).not.toHaveBeenCalled();
+    expect(reply.code).toHaveBeenCalledWith(404);
+  });
+
+  test('surfaces AI service error with its status code', async () => {
+    const fakeJob = { id: 1, title: 'Dev Backend', update: jest.fn() };
+    Job.findOne.mockResolvedValue(fakeJob);
+    axios.post.mockRejectedValue({
+      response: { status: 400, data: { error: 'companyUrl inválida' } },
+    });
+
+    const req = makeRequest({
+      params: { id: 1 },
+      body: { companyUrl: 'https://bad-url.com' },
+    });
+    req.headers = { authorization: 'Bearer test-token' };
+    const reply = makeReply();
+
+    await jobController.aiGenerateDescription(req, reply);
+
+    expect(reply.code).toHaveBeenCalledWith(400);
+    expect(fakeJob.update).not.toHaveBeenCalled();
   });
 });
 

@@ -11,7 +11,9 @@
   },
   "jest": {
     "testEnvironment": "node",
-    "testMatch": ["**/__tests__/**/*.test.js"]
+    "testMatch": [
+      "**/__tests__/**/*.test.js"
+    ]
   },
   "keywords": [],
   "author": "",
@@ -19,6 +21,7 @@
   "type": "commonjs",
   "dependencies": {
     "@fastify/jwt": "^10.0.0",
+    "axios": "^1.15.0",
     "dotenv": "^16.6.1",
     "fastify": "^5.7.4",
     "fastify-plugin": "^5.0.1",

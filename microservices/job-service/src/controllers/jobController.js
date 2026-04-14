@@ -1,4 +1,5 @@
 const { Job, Department } = require('../models');
+const axios = require('axios');
 
 // POST /jobs
 exports.createJob = async (request, reply) => {
@@ -155,6 +156,39 @@ exports.getPublicJobs = async (request, reply) => {
   } catch (error) {
     request.log.error(error);
     return reply.code(500).send({ error: `Database error: ${error.message}` });
+  }
+};
+
+// POST /jobs/:id/ai-generate  — genera descripción con IA y la guarda en el job
+exports.aiGenerateDescription = async (request, reply) => {
+  const { id } = request.params;
+  const { companyUrl } = request.body;
+  const tenant_id = request.user.company_id;
+
+  try {
+    const job = await Job.findOne({ where: { id, tenant_id } });
+    if (!job) return reply.code(404).send({ error: 'Vacante no encontrada.' });
+
+    // Forward the JWT so the AI service can verify it
+    const authHeader = request.headers.authorization;
+
+    const aiResponse = await axios.post(
+      `${process.env.AI_SERVICE_URL}/api/v1/jobs/generate-description`,
+      { jobTitle: job.title, companyUrl },
+      { headers: { Authorization: authHeader } }
+    );
+
+    const generatedDescription = aiResponse.data.data;
+    await job.update({ description: generatedDescription });
+
+    return reply.send({ message: 'Descripción generada exitosamente.', data: job });
+  } catch (error) {
+    // Surface AI service errors cleanly instead of leaking axios internals
+    if (error.response) {
+      return reply.code(error.response.status).send({ error: error.response.data });
+    }
+    request.log.error(error);
+    return reply.code(500).send({ error: `Error al contactar el servicio de IA: ${error.message}` });
   }
 };
 
