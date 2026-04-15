@@ -1,5 +1,9 @@
 
 const validateNicaraguanRUC = (ruc) => {
+    if (!ruc || typeof ruc !== 'string') {
+        return false;
+    }
+    
     // Removes any hyphens or spaces the user might have typed
     const cleanRUC = ruc.replace(/[-\s]/g, ''); 
     

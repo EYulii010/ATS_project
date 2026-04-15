@@ -3,7 +3,7 @@ const sequelize = require('../config/database');
 
 const Invitation = sequelize.define('Invitation', {
     id: {
-        type: DataTypes.UUIDV4,
+        type: DataTypes.UUID,
         allowNull: false,
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4

@@ -1,8 +1,10 @@
 const dotenv = require('dotenv').config()
 const crypto = require('crypto');
-const { Invitation, Employee, sequelize } = require('../models');
+const { Invitation, Employee, Session, sequelize } = require('../models');
 const { checkIfUserExists } = require('../utils/userUtils');
 const { joinSQLFragments } = require('sequelize/lib/utils/join-sql-fragments');
+const { sendInvitationEmail } = require('../utils/emailService');
+const { validatePasswordStrength } = require('../utils/passwordUtils')
 
 exports.createInvitation = async (request, reply) => {
     const { user_id, role, company_id } = request.user;
@@ -76,7 +78,8 @@ exports.createInvitation = async (request, reply) => {
             expires_at: expiresAt,
         });
 
-        const inviteLink = `http://localhost:${process.env.PORT}/api/v1/auth/register/reclutador?token=${token}&email=${email}`;
+        // ESTE LINK ES DEL FRONTEND NO DEL AUTH !!!
+        const inviteLink = `http://localhost:5173/register/reclutador?token=${token}&email=${email}`;
         // Enviar el link por log para testing
         request.log.info(`[MOCK EMAIL] To: ${email} | Subject: Únete a mi equipo en APPLIK | Link: ${inviteLink}`);
         // Enviar el link usando el emailService
@@ -104,6 +107,15 @@ exports.handleAcceptInvitation = async (request, reply) => {
     const validateEmailRegex = /^\S+@\S+\.\S+$/;
 
     const transaction = await sequelize.transaction();
+
+    const passwordCheck = validatePasswordStrength(password);
+    if (!passwordCheck.isValid){
+        return reply.code(400).send({
+            success: false,
+            field: "password", // Le decimos al frontend qué campo falló
+            message: passwordCheck.message
+        });
+    }
     
     try{
         if (!law_787_accepted){
@@ -141,6 +153,8 @@ exports.handleAcceptInvitation = async (request, reply) => {
             law_787_accepted
         }, {transaction: transaction});
 
+        console.log(`Created user ID: ${createdRecruiter.id}`);
+
         await invitation.update({ is_accepted: true }, { transaction });
 
         await transaction.commit();
@@ -172,10 +186,24 @@ exports.handleAcceptInvitation = async (request, reply) => {
             }
         });
     } catch (error) {
-        await transaction.rollback()
+        if (transaction && !transaction.finished) {
+            await transaction.rollback();
+        }
+        
+       if (error.name === 'SequelizeValidationError') {
+        const detalles = error.errors.map(e => ({ campo: e.path, mensaje: e.message }));
+        console.error("DETALLE DEL ERROR DE VALIDACIÓN:", detalles);
+        return reply.code(400).send({
+            success: false,
+            message: "Error de validación en la base de datos",
+            errors: detalles
+        });
+    }
+        
+        request.log.error(error);
         return reply.code(500).send({
             success: false,
-            message: `Algo salió mal al crear el nuevo usuario reclutador: ${error}`
+            message: `Error después del commit: ${error.message}`
         });
     }
 }

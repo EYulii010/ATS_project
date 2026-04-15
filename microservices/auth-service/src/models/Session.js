@@ -3,7 +3,7 @@ const sequelize = require('../config/database');
 
 const Session = sequelize.define('Session', {
     id: {
-        type: DataTypes.UUIDV4,
+        type: DataTypes.UUID,
         allowNull: false,
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4
@@ -11,12 +11,12 @@ const Session = sequelize.define('Session', {
     employee_id: {
         type: DataTypes.INTEGER,
         allowNull: true,
-        references: { model: 'Employee', key: 'id' }
+        references: { model: 'Employees', key: 'id' }
     },
     candidate_id: {
         type: DataTypes.INTEGER,
         allowNull: true,
-        references: { model: 'Candidate', key: 'id' }
+        references: { model: 'Candidates', key: 'id' }
     },
     token : {
         type: DataTypes.TEXT,
