@@ -11,7 +11,7 @@ class IngestCandidateUseCase {
      * Aplica el flujo complejo de Postulación pública o manual (RF-12, RF-13).
      * Requiere el texto del CV que ya fue parseado en una capa anterior (como S3 / Multer).
      */
-    async execute({ rawCvText, s3Url, law787Accepted, tenantId, candidateId = null }) {
+    async execute({ rawCvText, s3Url, law787Accepted, tenantId, candidateId = null, jobId }) {
         if (law787Accepted !== true) {
             throw new Error('La política de privacidad y tratamiento de datos (Ley 787) no fue aceptada.');
         }
@@ -106,11 +106,23 @@ class IngestCandidateUseCase {
             // Por arquitectura (PGVector), el match score se computará comparando `embeddingVector`
             // contra los Embeddings de las tablas de Vacantes en el backend.
 
+            // 8. Crear la Tupla de Aplicación a Vacante
+            let application = null;
+            if (jobId) {
+                application = await Application.create({
+                    profile_id: profile.id,
+                    job_id: jobId,
+                    status: 'postulado',
+                    // match_score: null -> Se calculará asincronamente después
+                }, { transaction });
+            }
+
             await transaction.commit();
             return {
                 status: 'success',
                 message: 'Candidato ingestando y analizado con éxito',
                 profile_id: profile.id,
+                application_id: application ? application.id : null,
                 extracted_name: extractedData.personal_info.name
             };
 

@@ -1,4 +1,5 @@
 const ingestCandidate = require('../../core/useCases/IngestCandidate');
+const jobClient = require('../../infrastructure/jobBridge/JobClient');
 const { Application } = require('../../core/domain/models');
 
 class CandidateController {
@@ -8,15 +9,21 @@ class CandidateController {
      * Postulación Externa Directa (RF-12)
      */
     async applyPublic(request, reply) {
-        const { rawCvText, s3Url, law787Accepted } = request.body;
+        const { rawCvText, s3Url, law787Accepted, jobToken } = request.body;
         
         try {
-            // Este endpoint asume que el candidato se auto-ingresa (Tenant opcional/asignado por URL)
+            if (!jobToken) {
+                return reply.code(400).send({ error: 'Es obligatorio proveer un jobToken válido para aplicar.' });
+            }
+
+            // Consultar Job-Service cruzado para resolver la metadata
+            const jobData = await jobClient.getJobByToken(jobToken);
             const result = await ingestCandidate.execute({
                 rawCvText,
                 s3Url,
                 law787Accepted,
-                tenantId: request.tenantId || null, // Depende de la lógica del link
+                tenantId: request.tenantId || jobData.tenant_id, // Si no está loggeado, toma el del job
+                jobId: jobData.id,
                 candidateId: request.user && request.user.role === 'candidate' ? request.user.user_id : null
             });
             return reply.code(201).send(result);
@@ -34,17 +41,19 @@ class CandidateController {
      * Carga Manual por Reclutador (RF-13)
      */
     async uploadManual(request, reply) {
-        const { rawCvText, s3Url } = request.body;
+        const { rawCvText, s3Url, jobId } = request.body;
         const law787Accepted = true; // Si es reclutador, se asumen firmas físicas previas o B2B
 
         try {
+            if (!jobId) {
+                return reply.code(400).send({ error: 'Debes especificar el jobId en la carga manual del CV.' });
+            }
             const result = await ingestCandidate.execute({
                 rawCvText,
                 s3Url,
                 law787Accepted,
                 tenantId: request.tenantId, // Asegurado por JWT
-                // Si el que lo sube es recruiter, la identidad del candidato no es la del JWT del reclutador.
-                // Quedaría nulo (huérfano en talento) hasta que el candidato reclame su perfil.
+                jobId: jobId,
                 candidateId: null 
             });
             return reply.code(201).send(result);
