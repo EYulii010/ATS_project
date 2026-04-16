@@ -295,3 +295,33 @@ exports.getMe = async (request, reply) => {
       })
     }
 }
+
+exports.handleLogout = async (request, reply) => {
+  try {
+    const authHeader = request.headers.authorization;
+    if(!authHeader){
+      return reply.code(401).send({ success: false, message: "Token no proporcionado" });
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    const deletedSession = await Session.destroy({
+      where: {token: token}
+    });
+
+    if (deletedSession === 0){
+      return reply.code(400).send({ success: false, message: "Sesión no encontrada o ya cerrada" });
+    }
+
+    return reply.code(200).send({
+      success: true,
+      message: "Sesión cerrada exitosamente. Hasta Pronto."
+    });
+  } catch (error) {
+    request.log.error(error);
+    return reply.code(500).send({
+      success: false,
+      message: "Error interno en el servidor al tratar de cerrar la sesión"
+    })
+  }
+}
