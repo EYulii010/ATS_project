@@ -36,18 +36,18 @@ export default function DetallesVacantePage({ onBack, onEdit }) {
 
         {/* Header card */}
         <div className="rounded-2xl bg-white p-6 shadow-sm">
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div className="space-y-2">
               <span className="inline-block rounded-full bg-teal-light/20 px-3 py-0.5 text-xs text-teal-dark font-medium">
                 Activa hace {vacante.diasActiva} días
               </span>
-              <h1 className="text-2xl font-bold text-slate-800">{vacante.titulo}</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-800">{vacante.titulo}</h1>
               <div className="flex items-center gap-3 text-sm text-slate-500">
                 <span className="flex items-center gap-1"><Tag className="size-3.5" />{vacante.categoria}</span>
                 <span className="flex items-center gap-1"><MapPin className="size-3.5" />{vacante.ubicacion}</span>
               </div>
             </div>
-            <Button variant="outline" size="md" onClick={onEdit}>
+            <Button variant="outline" size="md" onClick={onEdit} className="w-full sm:w-auto shrink-0">
               <Pencil /> Editar vacante
             </Button>
           </div>

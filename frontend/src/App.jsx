@@ -10,11 +10,17 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import VacantesPage from './pages/Vacantes/VacantesPage';
 import CandidatosPage from './pages/Candidatos/CandidatosPage';
 import PanelPrincipalPage from './pages/PanelPrincipal/PanelPrincipalPage';
-import ApplicantLayout from './components/layout/ApplicantLayout/ApplicantLayout';import ConfiguracionPage from './pages/Configuracion/ConfiguracionPage';
+import ApplicantLayout from './components/layout/ApplicantLayout/ApplicantLayout';
+import ConfiguracionPage from './pages/Configuracion/ConfiguracionPage';
+import EstadisticasPage from './pages/Estadisticas/EstadisticasPage';
 
-// Componentes temporales para testing de sesión no más
+import LoginPage from './pages/Auth/LoginPage';
 import TestLogin from './pages/TestLogin';
 import PerfilPage from './pages/PortalAplicantes/PerfilPage';
+import InicioPage from './pages/PortalAplicantes/InicioPage';
+import TrabajosPage from './pages/PortalAplicantes/TrabajosPage';
+import DetallesPuestoPage from './pages/PortalAplicantes/DetallesPuestoPage';
+import MisAplicacionesPage from './pages/PortalAplicantes/MisAplicacionesPage';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -25,18 +31,17 @@ function App() {
         <Routes >
           {/* Portal de aplicante: Público */}
           <Route element={<ApplicantLayout />}>
-            <Route index element={<div>Inicio aquí</div>} />
-            <Route path='/trabajos' element={<div>Bolsa de trabajo aquí</div>}/>
-            <Route path='/trabajo/:id' element={<div>Detalles de trabajo aquí</div>} />
+            <Route index element={<InicioPage />} />
+            <Route path='/trabajos' element={<TrabajosPage />}/>
+            <Route path='/trabajo/:id' element={<DetallesPuestoPage />} />
             {/* ↑ Detalles de Aplicación podría ser un modal en lugar de página */}
-            <Route path='/login' element={<TestLogin/>} />
             <Route path='/registro' element={<div>Registro aquí</div>}/>
             {/* Register para empresas, redirige loggeado como admin a /dashboard */}
             <Route path='/registrar-empresa' element={<div>Registro empresa aquí</div>}/>
             {/* Ruta protegida para página de perfil */}
             <Route element={<ProtectedRoute allowedRoles={["aplicante", "reclutador", "admin"]} />}>
               <Route path='/perfil' element={<PerfilPage />} />
-              <Route path='/aplicaciones' element={<div>Aplicaciones aquí</div>}/>
+              <Route path='/aplicaciones' element={<MisAplicacionesPage />}/>
             </Route> 
           </Route>
 
@@ -54,12 +59,17 @@ function App() {
             <Route path='dashboard' element={<PanelPrincipalPage />}></Route>
             <Route path='vacantes' element={<VacantesPage />}></Route>
             <Route path='candidatos' element={<CandidatosPage />}></Route>
-            <Route path='estadistica' element={<div>Estadística aquí</div>}></Route>
+            <Route path='estadistica' element={<EstadisticasPage />}></Route>
             <Route path='configuracion' element={<ConfiguracionPage />}></Route>
             <Route index element={<div>Página de Inicio</div>} />
           </Route>
 
-            {/* Crear página de Not Found  */}
+            {/* Auth — sin layout */}
+          <Route path='/login' element={<LoginPage />} />
+          {/* Dev only — personas de prueba */}
+          <Route path='/dev/login' element={<TestLogin />} />
+
+          {/* Crear página de Not Found  */}
           <Route path='*' element={<div>Not Found aquí</div>}/>
         </Routes>
       </BrowserRouter>

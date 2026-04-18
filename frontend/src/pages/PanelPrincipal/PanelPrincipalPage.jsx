@@ -30,7 +30,7 @@ const topCandidatos = [
 function MatchScoreBar({ score }) {
   return (
     <div className="flex items-center gap-2">
-      <div className="h-1.5 w-20 rounded-full bg-slate-100 overflow-hidden">
+      <div className="h-1.5 w-16 md:w-20 rounded-full bg-slate-100 overflow-hidden">
         <div
           className="h-full rounded-full bg-gradient-to-r from-blue-dark to-teal-light"
           style={{ width: `${score}%` }}
@@ -44,7 +44,7 @@ function MatchScoreBar({ score }) {
 export default function DashboardPage() {
   const navigate  = useNavigate()
   const location  = useLocation()
-  const [vista, setVista] = useState("dashboard") // "dashboard" | "actividad"
+  const [vista, setVista] = useState("dashboard")
 
   useEffect(() => {
     setVista("dashboard")
@@ -55,16 +55,16 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6 p-6 bg-applik-bg min-h-screen">
+    <div className="space-y-6 bg-applik-bg min-h-screen">
 
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Panel Principal</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-slate-800">Panel Principal</h1>
         <p className="text-sm text-slate-400">Bienvenido de vuelta, aquí está el resumen de hoy</p>
       </div>
 
       {/* StatCards */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <StatCard label="Candidatos"        value="12" icon={Users}    iconColor="text-blue-dark"    iconBg="bg-blue-dark/10"    />
         <StatCard label="Vacantes"          value="48" icon={Briefcase} iconColor="text-purple-dark" iconBg="bg-purple-dark/10"  />
         <StatCard label="Nuevos Candidatos" value="6"  icon={UserPlus} iconColor="text-teal-dark"    iconBg="bg-teal-dark/10"    />
@@ -104,12 +104,12 @@ export default function DashboardPage() {
             </div>
             <div className="space-y-3">
               {posicionesAbiertas.map((pos, i) => (
-                <div key={i} className="flex items-center justify-between rounded-xl bg-slate-50 p-3">
-                  <div>
-                    <p className="text-sm font-medium text-slate-800">{pos.titulo}</p>
+                <div key={i} className="flex items-center justify-between rounded-xl bg-slate-50 p-3 gap-2">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-slate-800 truncate">{pos.titulo}</p>
                     <p className="text-xs text-slate-400">{pos.departamento} · {pos.candidatos} candidatos</p>
                   </div>
-                  <span className={`rounded-full px-3 py-1 text-xs font-medium ${
+                  <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${
                     pos.estado === "Activa"
                       ? "bg-teal-light/20 text-teal-dark"
                       : "bg-slate-200 text-slate-500"
@@ -127,7 +127,7 @@ export default function DashboardPage() {
       {/* Priority Matching */}
       <Card>
         <CardContent>
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <h2 className="font-semibold text-slate-800">Priority Matching</h2>
               <p className="text-xs text-slate-400">Candidatos con mayor compatibilidad</p>
@@ -137,31 +137,33 @@ export default function DashboardPage() {
             </Button>
           </div>
 
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-slate-100">
-                <th className="pb-3 text-left text-xs font-medium text-slate-400">Candidato</th>
-                <th className="pb-3 text-left text-xs font-medium text-slate-400">Posición</th>
-                <th className="pb-3 text-left text-xs font-medium text-slate-400">Match Score</th>
-                <th className="pb-3 text-left text-xs font-medium text-slate-400">Etapa</th>
-              </tr>
-            </thead>
-            <tbody>
-              {topCandidatos.map((c) => (
-                <tr key={c.id} className="border-b border-slate-50 last:border-0">
-                  <td className="py-3">
-                    <div className="flex items-center gap-3">
-                      <Avatar name={c.nombre} size="sm" />
-                      <p className="font-medium text-slate-800">{c.nombre}</p>
-                    </div>
-                  </td>
-                  <td className="py-3 text-slate-600">{c.posicion}</td>
-                  <td className="py-3"><MatchScoreBar score={c.score} /></td>
-                  <td className="py-3"><StageBadge stage={c.etapa} /></td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[480px]">
+              <thead>
+                <tr className="border-b border-slate-100">
+                  <th className="pb-3 text-left text-xs font-medium text-slate-400">Candidato</th>
+                  <th className="pb-3 text-left text-xs font-medium text-slate-400">Posición</th>
+                  <th className="pb-3 text-left text-xs font-medium text-slate-400">Match Score</th>
+                  <th className="pb-3 text-left text-xs font-medium text-slate-400">Etapa</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {topCandidatos.map((c) => (
+                  <tr key={c.id} className="border-b border-slate-50 last:border-0">
+                    <td className="py-3">
+                      <div className="flex items-center gap-3">
+                        <Avatar name={c.nombre} size="sm" />
+                        <p className="font-medium text-slate-800 whitespace-nowrap">{c.nombre}</p>
+                      </div>
+                    </td>
+                    <td className="py-3 text-slate-600 whitespace-nowrap">{c.posicion}</td>
+                    <td className="py-3"><MatchScoreBar score={c.score} /></td>
+                    <td className="py-3"><StageBadge stage={c.etapa} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </CardContent>
       </Card>
 

@@ -35,15 +35,15 @@ export function CardContent({ className, children }) {
 // StatCard — métricas del Dashboard
 export function StatCard({ label, value, icon: Icon, iconColor = "text-blue-dark", iconBg = "bg-blue-dark/10" }) {
   return (
-    <Card className="flex items-center gap-4 p-5">
+    <Card className="flex items-center gap-3 p-4 md:gap-4 md:p-5">
       {Icon && (
-        <div className={cn("flex size-12 shrink-0 items-center justify-center rounded-xl", iconBg)}>
-          <Icon className={cn("size-6", iconColor)} />
+        <div className={cn("flex size-9 md:size-12 shrink-0 items-center justify-center rounded-xl", iconBg)}>
+          <Icon className={cn("size-4 md:size-6", iconColor)} />
         </div>
       )}
-      <div>
-        <p className="text-2xl font-bold text-slate-800">{value}</p>
-        <p className="text-sm text-slate-500">{label}</p>
+      <div className="min-w-0">
+        <p className="text-xl md:text-2xl font-bold text-slate-800">{value}</p>
+        <p className="text-xs md:text-sm text-slate-500 truncate">{label}</p>
       </div>
     </Card>
   )

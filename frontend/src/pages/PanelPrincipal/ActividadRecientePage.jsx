@@ -62,12 +62,12 @@ export default function ActividadRecientePage({ onBack }) {
         </div>
 
         {/* Filtros */}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
           {tiposFiltro.map((tipo) => (
             <button
               key={tipo}
               onClick={() => setFiltro(tipo)}
-              className={`rounded-xl border px-4 py-2 text-sm transition-all ${
+              className={`shrink-0 rounded-xl border px-4 py-2 text-sm transition-all whitespace-nowrap ${
                 filtroActivo === tipo
                   ? "border-blue-dark bg-blue-dark/5 text-blue-dark font-medium"
                   : "border-slate-200 bg-white text-slate-500 hover:border-slate-300"

@@ -20,7 +20,7 @@ export default function DetallesCandidatoPage({ candidato, onBack, onActualizarE
 
         {/* Header card */}
         <div className="rounded-2xl bg-white p-6 shadow-sm">
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div className="flex items-center gap-4">
               <Avatar name={candidato.nombre} size="lg" />
               <div>
@@ -29,11 +29,11 @@ export default function DetallesCandidatoPage({ candidato, onBack, onActualizarE
                 <p className="text-xs text-slate-400">{candidato.email}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Button variant="destructive" size="sm" onClick={onDescartar}>
+            <div className="flex items-center gap-2 sm:shrink-0">
+              <Button variant="destructive" size="sm" onClick={onDescartar} className="flex-1 sm:flex-none">
                 Descartar
               </Button>
-              <Button variant="primary" size="md" onClick={onActualizarEtapa}>
+              <Button variant="primary" size="md" onClick={onActualizarEtapa} className="flex-1 sm:flex-none">
                 Manejar Aplicación
               </Button>
             </div>

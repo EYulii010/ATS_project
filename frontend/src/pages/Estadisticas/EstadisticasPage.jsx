@@ -27,11 +27,11 @@ const tendenciaData = [
 ]
 
 const departamentosData = [
-  { depto: "Gerencia",    candidatos: 12 },
-  { depto: "Marketing",  candidatos: 8  },
-  { depto: "Finanzas",   candidatos: 5  },
-  { depto: "IT",         candidatos: 15 },
-  { depto: "Operaciones", candidatos: 7 },
+  { depto: "Gerencia",     candidatos: 12 },
+  { depto: "Marketing",   candidatos: 8  },
+  { depto: "Finanzas",    candidatos: 5  },
+  { depto: "IT",          candidatos: 15 },
+  { depto: "Operaciones", candidatos: 7  },
 ]
 
 const deptoColores = ["#4F46E5", "#06B6D4", "#8B5CF6", "#10B981", "#F59E0B"]
@@ -70,15 +70,15 @@ export default function EstadisticasPage() {
   const [periodoActivo, setPeriodo] = useState("Anual")
 
   return (
-    <div className="space-y-6 p-6 bg-applik-bg min-h-screen">
+    <div className="space-y-6 bg-applik-bg min-h-screen">
 
       {/* Header */}
-      <div className="flex items-start justify-between flex-wrap gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Estadísticas</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-slate-800">Estadísticas</h1>
           <p className="text-sm text-slate-400">Resumen de métricas de reclutamiento</p>
         </div>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-3 sm:flex sm:flex-wrap gap-2">
           {periodos.map((p) => (
             <button
               key={p}
@@ -96,7 +96,7 @@ export default function EstadisticasPage() {
       </div>
 
       {/* StatCards */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <StatCard label="Activos Ahora"   value="12"  icon={Users}      iconColor="text-blue-dark"   iconBg="bg-blue-dark/10"   />
         <StatCard label="Vacantes"        value="48"  icon={Briefcase}  iconColor="text-purple-dark" iconBg="bg-purple-dark/10" />
         <StatCard label="Tasa de Match"   value="82%" icon={TrendingUp} iconColor="text-teal-dark"   iconBg="bg-teal-dark/10"   />
@@ -104,10 +104,10 @@ export default function EstadisticasPage() {
       </div>
 
       {/* Fila del medio */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 
         {/* Nuevos Candidatos + Porcentaje Contratación */}
-        <div className="space-y-6">
+        <div className="space-y-6 md:col-span-1">
           <Card>
             <CardContent>
               <p className="text-sm text-slate-400">Nuevos Candidatos</p>
@@ -169,7 +169,7 @@ export default function EstadisticasPage() {
         </Card>
 
         {/* Tendencia de Candidatos */}
-        <Card>
+        <Card className="md:col-span-2 lg:col-span-1">
           <CardContent>
             <p className="mb-4 text-sm font-semibold text-slate-800">Tendencia de Candidatos 2025</p>
             <ResponsiveContainer width="100%" height={260}>
@@ -198,7 +198,7 @@ export default function EstadisticasPage() {
 
       </div>
 
-      {/* Candidatos por Departamento — Barras */}
+      {/* Candidatos por Departamento */}
       <Card>
         <CardContent>
           <p className="mb-4 text-sm font-semibold text-slate-800">Candidatos por Departamento</p>

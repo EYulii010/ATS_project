@@ -60,7 +60,7 @@ export default function PrivacidadPage({ onBack }) {
         {/* Manejo de Datos */}
         <div>
           <p className="mb-3 text-sm font-semibold text-slate-800">Manejo de Datos</p>
-          <div className="grid grid-cols-2 gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
             <button className="flex flex-col items-center gap-2 rounded-xl p-4 text-slate-500 hover:bg-slate-50 transition-colors">
               <Download className="size-7 text-slate-400" />
               <span className="text-sm">Importar Datos</span>

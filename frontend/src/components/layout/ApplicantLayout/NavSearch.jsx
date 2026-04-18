@@ -7,16 +7,16 @@ const NavSearch = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const navigate = useNavigate();
     const inputRef = useRef(null);
-    
+
     useEffect(() => {
-        if (isOpen && inputRef.current){
+        if (isOpen && inputRef.current) {
             inputRef.current.focus();
         }
     }, [isOpen]);
 
     const handleSearch = (e) => {
         e.preventDefault();
-        if(searchTerm.trim()) {
+        if (searchTerm.trim()) {
             navigate(`/trabajos?q=${encodeURIComponent(searchTerm)}`);
             setIsOpen(false);
             setSearchTerm("");
@@ -25,41 +25,64 @@ const NavSearch = () => {
 
     return (
         <div className="relative flex items-center">
-            {/* El input field que se expande */}
-            <form 
+
+            {/* Mobile: absolute expandido hacia la izquierda, no empuja nada */}
+            <form
                 onSubmit={handleSearch}
-                className={`flex itmes-center bg-slate-100 rounded-full transition-all duration-600 ease-in-out overflow-hidden ${
-                    isOpen ? "w-96 py-2 opacity-100 mr-2" : "w-0 p-0 opacity-0"
+                className={`md:hidden absolute right-8 top-1/2 -translate-y-1/2 flex items-center bg-slate-100 rounded-full transition-all duration-[600ms] ease-in-out overflow-hidden z-10 ${
+                    isOpen ? "w-44 py-2 opacity-100" : "w-0 py-0 opacity-0 pointer-events-none"
                 }`}
             >
-                <input 
+                <input
+                    ref={inputRef}
                     type="text"
-                    placeholder="Buscar vacante, empresa... "
+                    placeholder="Buscar..."
                     value={searchTerm}
-                    onChange={(e => setSearchTerm(e.target.value))}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full bg-transparent text-sm focus:outline-none text-slate-700 placeholder-slate-400 px-4"
                 />
-                {/* Cerrar búsqueda */}
                 <button
                     type="button"
                     onClick={() => setIsOpen(false)}
-                    className="text-slate-400 hover:text-applik-selected transition-colors mx-2"
+                    className="text-slate-400 hover:text-slate-600 transition-colors mx-2 shrink-0"
                 >
-                    <X size={16}/>
+                    <X size={16} />
                 </button>
             </form>
 
-            {/* Icono de lupa, solo visible si está cerrado el buscador */}
-            {!isOpen && (
-                <button 
-                    onClick={() => setIsOpen(true)}
-                    className="p-2 text-slate-800 hover:text-applik-selected hover:bg-purple-light rounded-full transition-all active:scale-95 hover:cursor-pointer"
+            {/* Desktop: inline, empuja suavemente */}
+            <form
+                onSubmit={handleSearch}
+                className={`hidden md:flex items-center bg-slate-100 rounded-full transition-all duration-[600ms] ease-in-out overflow-hidden ${
+                    isOpen ? "w-96 py-2 opacity-100 mr-2" : "w-0 p-0 opacity-0"
+                }`}
+            >
+                <input
+                    ref={inputRef}
+                    type="text"
+                    placeholder="Buscar vacante, empresa..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full bg-transparent text-sm focus:outline-none text-slate-700 placeholder-slate-400 px-4"
+                />
+                <button
+                    type="button"
+                    onClick={() => setIsOpen(false)}
+                    className="text-slate-400 hover:text-slate-600 transition-colors mx-2 shrink-0"
                 >
-                    <Search size={20}/>
+                    <X size={16} />
                 </button>
-            )}
+            </form>
+
+            {/* Ícono lupa */}
+            <button
+                onClick={() => setIsOpen((v) => !v)}
+                className="relative z-20 p-2 text-slate-800 hover:text-applik-selected hover:bg-purple-light rounded-full transition-all active:scale-95"
+            >
+                <Search size={20} />
+            </button>
         </div>
-    )
-}
+    );
+};
 
 export default NavSearch;

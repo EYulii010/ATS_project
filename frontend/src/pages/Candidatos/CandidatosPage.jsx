@@ -39,17 +39,17 @@ function FiltrosPanel({ filtros, onChange, onLimpiar }) {
   }
 
   return (
-    <div ref={panelRef} className="flex w-full items-center gap-3">
+    <div ref={panelRef} className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
       {Object.entries(filtrosOpciones).map(([tipo, opciones]) => {
         const seleccionados = filtros[tipo]
         const label = tipo.charAt(0).toUpperCase() + tipo.slice(1)
         const isOpen = abierto === tipo
 
         return (
-          <div key={tipo} className="relative flex-1">
+          <div key={tipo} className="relative shrink-0">
             <button
               onClick={() => setAbierto(isOpen ? null : tipo)}
-              className={`flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-2 text-sm transition-all ${
+              className={`flex items-center gap-2 rounded-xl border px-4 py-2 text-sm transition-all whitespace-nowrap ${
                 seleccionados.length > 0
                   ? "border-blue-dark bg-blue-dark/5 text-blue-dark"
                   : "border-slate-200 bg-white text-slate-500 hover:border-slate-300"
@@ -91,7 +91,7 @@ function FiltrosPanel({ filtros, onChange, onLimpiar }) {
       })}
 
       {Object.values(filtros).some((f) => f.length > 0) && (
-        <button onClick={onLimpiar} className="text-xs text-slate-400 hover:text-slate-600">
+        <button onClick={onLimpiar} className="text-xs text-slate-400 hover:text-slate-600 shrink-0 whitespace-nowrap">
           Limpiar filtros
         </button>
       )}
@@ -217,7 +217,7 @@ export default function CandidatosPage() {
   }
 
   return (
-    <div className="space-y-6 p-6 bg-applik-bg min-h-screen" onClick={() => setMenu(null)}>
+    <div className="space-y-6 bg-applik-bg min-h-screen" onClick={() => setMenu(null)}>
 
       {/* Modales */}
       {modal === "etapa" && (
@@ -229,7 +229,7 @@ export default function CandidatosPage() {
 
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Candidatos</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-slate-800">Candidatos</h1>
         <p className="text-sm text-slate-400">Gestiona todos tus candidatos en un solo lugar</p>
       </div>
 
@@ -237,7 +237,7 @@ export default function CandidatosPage() {
         <CardContent>
 
           {/* Búsqueda + Filtros */}
-          <div className="mb-4 flex items-center gap-4">
+          <div className="mb-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <div className="flex-1">
               <SearchInput
                 placeholder="Buscar candidatos..."
@@ -245,18 +245,16 @@ export default function CandidatosPage() {
                 onChange={(e) => setBusqueda(e.target.value)}
               />
             </div>
-            <div className="flex flex-1 items-center justify-end">
-              <FiltrosPanel
-                filtros={filtros}
-                onChange={(tipo, vals) => setFiltros((prev) => ({ ...prev, [tipo]: vals }))}
-                onLimpiar={() => setFiltros({ vacantes: [], area: [], reclutador: [] })}
-              />
-            </div>
+            <FiltrosPanel
+              filtros={filtros}
+              onChange={(tipo, vals) => setFiltros((prev) => ({ ...prev, [tipo]: vals }))}
+              onLimpiar={() => setFiltros({ vacantes: [], area: [], reclutador: [] })}
+            />
           </div>
 
           {/* Tabla */}
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[560px]">
               <thead>
                 <tr className="border-b border-slate-100">
                   <th className="pb-3 text-left text-xs font-medium text-slate-400">Candidato</th>

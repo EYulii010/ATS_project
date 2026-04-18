@@ -6,16 +6,12 @@ import { Card, CardContent } from "@/components/ui/Card"
 import VacanteFormModal from "./VacanteFormModal"
 import DetallesVacantePage from "./DetallesVacantePage"
 
-// Datos de prueba — se reemplazarán con llamadas a la API
 const vacantesData = [
   { id: 1, titulo: "Gerente de Ventas",     departamento: "Ventas",     aplicantes: 12, estado: "Activa", fechaPublicacion: "3/3/2026" },
   { id: 2, titulo: "Marketing Specialist",  departamento: "Marketing",  aplicantes: 14, estado: "Activa", fechaPublicacion: "3/3/2026" },
   { id: 3, titulo: "Contador Senior",       departamento: "Finanzas",   aplicantes: 12, estado: "Activa", fechaPublicacion: "3/3/2026" },
   { id: 4, titulo: "Desarrollador Web",     departamento: "Tecnología", aplicantes: 12, estado: "Activa", fechaPublicacion: "3/3/2026" },
 ]
-
-// Vista: "list" | "detalles"
-// Modal: null | "crear" | "editar"
 
 export default function VacantesPage() {
   const [busqueda, setBusqueda]     = useState("")
@@ -33,7 +29,6 @@ export default function VacantesPage() {
   const abrirEditar   = () => setModal("editar")
   const cerrarModal   = () => setModal(null)
 
-  // Vista detalle
   if (vista === "detalles") {
     return (
       <>
@@ -45,11 +40,9 @@ export default function VacantesPage() {
     )
   }
 
-  // Vista lista
   return (
-    <div className="space-y-6 p-6 bg-applik-bg min-h-screen">
+    <div className="space-y-6 bg-applik-bg min-h-screen">
 
-      {/* Modales disponibles desde la lista */}
       {modal === "crear" && (
         <VacanteFormModal onClose={cerrarModal} onSave={cerrarModal} />
       )}
@@ -58,12 +51,12 @@ export default function VacantesPage() {
       )}
 
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Vacantes</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-slate-800">Vacantes</h1>
           <p className="text-sm text-slate-400">Gestiona todas tus posiciones abiertas</p>
         </div>
-        <Button variant="gradient" onClick={() => setModal("crear")}>
+        <Button variant="gradient" onClick={() => setModal("crear")} className="w-full sm:w-auto">
           <Plus /> Crear Vacante
         </Button>
       </div>
@@ -71,8 +64,6 @@ export default function VacantesPage() {
       {/* Tabla */}
       <Card>
         <CardContent>
-
-          {/* Búsqueda */}
           <div className="mb-4">
             <SearchInput
               placeholder="Buscar vacantes..."
@@ -81,9 +72,8 @@ export default function VacantesPage() {
             />
           </div>
 
-          {/* Tabla */}
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[480px]">
               <thead>
                 <tr className="border-b border-slate-100">
                   <th className="pb-3 text-left text-xs font-medium text-slate-400">Título</th>
@@ -107,7 +97,7 @@ export default function VacantesPage() {
                       </button>
                     </td>
 
-                    <td className="py-3 text-slate-600">{v.departamento}</td>
+                    <td className="py-3 text-slate-600 whitespace-nowrap">{v.departamento}</td>
 
                     <td className="py-3">
                       <span className="flex items-center gap-1.5 text-slate-600">
@@ -117,7 +107,7 @@ export default function VacantesPage() {
                     </td>
 
                     <td className="py-3">
-                      <span className="rounded-full bg-teal-light/20 px-3 py-0.5 text-xs font-medium text-teal-dark">
+                      <span className="rounded-full bg-teal-light/20 px-3 py-0.5 text-xs font-medium text-teal-dark whitespace-nowrap">
                         {v.estado}
                       </span>
                     </td>
@@ -138,12 +128,9 @@ export default function VacantesPage() {
             </table>
 
             {vacantesFiltradas.length === 0 && (
-              <p className="py-8 text-center text-sm text-slate-400">
-                No se encontraron vacantes
-              </p>
+              <p className="py-8 text-center text-sm text-slate-400">No se encontraron vacantes</p>
             )}
           </div>
-
         </CardContent>
       </Card>
 

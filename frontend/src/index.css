@@ -141,6 +141,41 @@
 }
 /* ---break---
   */
+/* ── Scrollbar oculto ───────────────────────────────────────────────────── */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── Background blobs ───────────────────────────────────────────────────── */
+@keyframes blob1 {
+  0%, 100% { transform: translate(0px,    0px)  scale(1);    }
+  33%       { transform: translate(-35px,  28px) scale(1.06); }
+  66%       { transform: translate(18px,  -22px) scale(0.95); }
+}
+@keyframes blob2 {
+  0%, 100% { transform: translate(0px,   0px)   scale(1);    }
+  33%       { transform: translate(30px, -35px)  scale(1.05); }
+  66%       { transform: translate(-18px, 18px)  scale(0.96); }
+}
+.animate-blob1 { animation: blob1 18s ease-in-out infinite; }
+.animate-blob2 { animation: blob2 22s ease-in-out infinite; }
+
+/* ── Dropdown animations ────────────────────────────────────────────────── */
+@keyframes dropdown {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)   scale(1);    }
+}
+@keyframes fadeItem {
+  from { opacity: 0; transform: translateX(-4px); }
+  to   { opacity: 1; transform: translateX(0);    }
+}
+.animate-dropdown {
+  animation: dropdown 0.15s ease-out forwards;
+}
+.animate-fadeItem {
+  opacity: 0;
+  animation: fadeItem 0.15s ease-out forwards;
+}
+
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
