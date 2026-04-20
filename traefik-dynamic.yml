@@ -1,0 +1,41 @@
+http:
+  routers:
+    auth:
+      rule: "Host(`api.applik-ni.com`) && PathPrefix(`/api/v1/auth`)"
+      entryPoints:
+        - websecure
+      service: auth-service
+      tls:
+        certResolver: myresolver
+
+    job:
+      rule: "Host(`api.applik-ni.com`) && PathPrefix(`/api/v1/jobs`)"
+      entryPoints:
+        - websecure
+      service: job-service
+      tls:
+        certResolver: myresolver
+
+    talent:
+      rule: "Host(`api.applik-ni.com`) && PathPrefix(`/api/v1/talents`)"
+      entryPoints:
+        - websecure
+      service: talent-service
+      tls:
+        certResolver: myresolver
+
+  services:
+    auth-service:
+      loadBalancer:
+        servers:
+          - url: "http://applik_auth_prod:3001"
+
+    job-service:
+      loadBalancer:
+        servers:
+          - url: "http://applik_job_prod:3003"
+
+    talent-service:
+      loadBalancer:
+        servers:
+          - url: "http://applik_talent_prod:3002"
