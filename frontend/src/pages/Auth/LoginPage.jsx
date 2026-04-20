@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import Logo from "@/components/ui/Logo";
 import { useAuth } from "@/context/AuthContext";
+import { login as loginApi } from "@/api/auth";
 
 const LoginPage = () => {
     const [tab, setTab] = useState("candidato");
@@ -10,23 +11,25 @@ const LoginPage = () => {
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [remember, setRemember] = useState(false);
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const { login } = useAuth();
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Mock login hasta que el backend esté listo
-        const mockUser = {
-            id: 102,
-            name: "Usuario",
-            email,
-            role: tab === "candidato" ? "aplicante" : "reclutador",
-            tenant_name: tab === "empresa" ? "Mi Empresa" : null,
-            avatar_color: "from-purple-500 to-purple-700",
-        };
-        login(mockUser);
-        navigate(tab === "empresa" ? "/dashboard" : "/trabajos");
+        setError("");
+        setLoading(true);
+        try {
+            const { token } = await loginApi(email, password);
+            await login(token);
+            navigate(tab === "empresa" ? "/dashboard" : "/trabajos");
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -178,12 +181,15 @@ const LoginPage = () => {
                             </Link>
                         </div>
 
+                        {error && <p className="text-xs text-red-500 text-center">{error}</p>}
+
                         {/* Submit */}
                         <button
                             type="submit"
-                            className="w-full bg-violet-600 hover:bg-violet-700 text-white font-semibold py-2.5 rounded-xl transition-all duration-200 active:scale-[0.98] text-sm mt-2"
+                            disabled={loading}
+                            className="w-full bg-violet-600 hover:bg-violet-700 hover:shadow-lg hover:shadow-violet-200 hover:-translate-y-0.5 text-white font-semibold py-2.5 rounded-xl transition-all duration-200 active:scale-[0.98] text-sm mt-2 disabled:opacity-60 disabled:pointer-events-none"
                         >
-                            Entrar
+                            {loading ? "Ingresando..." : "Entrar"}
                         </button>
                     </form>
 
