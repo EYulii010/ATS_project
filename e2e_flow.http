@@ -1,0 +1,93 @@
+### ATS E2E Testing Flow (REST Client)
+# Usa la extensión VSC REST Client o importa en Postman.
+
+@apiAuth = http://localhost:3001/api/v1/auth
+@apiJob = http://localhost:3003/api/v1/jobs
+@apiTalent = http://localhost:3002/api/v1/talents
+@email = req_test@applik.com
+@password = password123
+
+### 0. Levantar Cluster de Producción Docker Local
+# Ve a la terminal y ejecuta: `docker-compose up --build -d`
+
+### 0.5 Poblar Organización y Usuario Admin (SEMBRADO)
+# Al ser una DB virgen en Docker, ocupamos crear la empresa
+# @name registerOrg
+POST {{apiAuth}}/organizations/register
+Content-Type: application/json
+
+{
+    "businessName": "Applik Corp",
+    "RUC": "J0000000000000",
+    "adminEmail": "req_test@applik.com",
+    "password": "Password123!",
+    "first_name": "Reclutador",
+    "last_name": "Maestro",
+    "law_787_accepted": true
+}
+
+### 1. Iniciar Sesión (Reclutador)
+# @name login
+POST {{apiAuth}}/login
+Content-Type: application/json
+
+{
+    "email": "req_test@applik.com",
+    "password": "Password123!"
+}
+
+### Extraemos el Token del Login a una variable global
+@authToken = {{login.response.body.token}}
+
+### 1.5 Crear Departamento de IT
+# @name createDept
+POST http://localhost:3003/api/v1/departments
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "Ingeniería Backend"
+}
+
+### Extraemos el ID del departamento
+@deptId = {{createDept.response.body.id}}
+
+### 2. Generar una Vacante y obtener el Link (Job Service)
+# @name createJob
+POST {{apiJob}}
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Ingeniero de Software Senior en Node.js",
+  "description": "Desarrollador backend experimentado con enfoque en Fastify y Postgres.",
+  "department_id": {{deptId}},
+  "salary_min": 1500.00,
+  "salary_max": 2000.00,
+  "currency": "USD"
+}
+
+### Extraemos el public token y ID
+@jobToken = {{createJob.response.body.public_token}}
+@jobId = {{createJob.response.body.id}}
+
+### 2.5 Publicar la Vacante
+# @name publishJob
+PATCH {{apiJob}}/{{jobId}}
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "status": "published"
+}
+
+### 3. Ingesta Inicial del CV (Talent Service via Public Link)
+# Simulamos a un Candidato externo clickeando en nuestro portal
+POST {{apiTalent}}/public/apply
+Content-Type: application/json
+
+{
+  "rawCvText": "Soy un Ingeniero de Software experimentado en Node.js, mi email es talento@ejemplo.com. Tengo experiencia en bases de datos PostgreSQL, React y me encanta Docker.",
+  "jobToken": "{{jobToken}}",
+  "law787Accepted": true
+}

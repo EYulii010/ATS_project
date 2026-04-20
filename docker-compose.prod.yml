@@ -1,0 +1,74 @@
+services:
+  reverse-proxy:
+    image: traefik:v2.10
+    container_name: ats_proxy
+    command:
+      - "--api.insecure=false"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      # - "--certificatesresolvers.myresolver.acme.email=tu-correo@empresa.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./letsencrypt:/letsencrypt"
+    restart: unless-stopped
+    networks:
+      - ats_network
+
+  auth-service:
+    build: ./microservices/auth-service
+    container_name: applik_auth_prod
+    env_file: .env
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.auth.rule=Host(`api.tu-dominio.com`) && PathPrefix(`/api/v1/auth`)"
+      - "traefik.http.routers.auth.entrypoints=websecure"
+      - "traefik.http.routers.auth.tls.certresolver=myresolver"
+    networks:
+      - ats_network
+
+  job-service:
+    build: ./microservices/job-service
+    container_name: applik_job_prod
+    env_file: .env
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.job.rule=Host(`api.tu-dominio.com`) && PathPrefix(`/api/v1/jobs`)"
+      - "traefik.http.routers.job.entrypoints=websecure"
+      - "traefik.http.routers.job.tls.certresolver=myresolver"
+    networks:
+      - ats_network
+
+  talent-service:
+    build: ./microservices/talent-service
+    container_name: applik_talent_prod
+    env_file: .env
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.talent.rule=Host(`api.tu-dominio.com`) && PathPrefix(`/api/v1/talents`)"
+      - "traefik.http.routers.talent.entrypoints=websecure"
+      - "traefik.http.routers.talent.tls.certresolver=myresolver"
+    networks:
+      - ats_network
+
+  ai-service:
+    build: ./microservices/ai-service
+    container_name: applik_ai_prod
+    env_file: .env
+    restart: unless-stopped
+    # Nota: Usualmente el AI Service NO se expone a internet, solo la red interna
+    networks:
+      - ats_network
+
+networks:
+  ats_network:
+    driver: bridge

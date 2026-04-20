@@ -1,0 +1,109 @@
+version: '3.8'
+
+networks:
+  applik_network:
+    driver: bridge
+
+services:
+  postgres-ai:
+    # Utilizamos la imagen oficial de ankane/pgvector que ya incluye PostgreSQL y la
+    # extensión nativa de C necesaria para operaciones de IA y similaridad de coseno
+    image: ankane/pgvector:latest
+    container_name: applik_postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminpassword
+      # Creamos por default la DB para el Talent Service (el resto pueden crearse internamente)
+      POSTGRES_DB: talent_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - applik_pgdata:/var/lib/postgresql/data
+    networks:
+      - applik_network
+    restart: unless-stopped
+
+  ai-service:
+    build:
+      context: ./microservices/ai-service
+    container_name: applik_ai
+    env_file: 
+      - ./microservices/ai-service/.env
+    environment:
+      - PORT=3000
+    ports:
+      - "3000:3000"
+    networks:
+      - applik_network
+    restart: unless-stopped
+
+  auth-service:
+    build:
+      context: ./microservices/auth-service
+    container_name: applik_auth
+    env_file: 
+      - ./microservices/auth-service/.env
+    environment:
+      - AUTH_DB_HOST=applik_postgres
+      - AUTH_DB_NAME=talent_db
+      - AUTH_DB_UNAME=admin
+      - AUTH_DB_PASSWORD=adminpassword
+      - JWT_SECRET=applik_super_secret_jwt_key_2026
+      - AUTH_DB_PEPPER=applik_global_pepper_2026
+      - PORT=3001
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres-ai
+    networks:
+      - applik_network
+    restart: unless-stopped
+
+  talent-service:
+    build:
+      context: ./microservices/talent-service
+    container_name: applik_talent
+    env_file: 
+      - ./microservices/talent-service/.env
+    environment:
+      - DB_HOST=applik_postgres
+      - DB_NAME=talent_db
+      - DB_USER=admin
+      - DB_PASSWORD=adminpassword
+      - JWT_SECRET=applik_super_secret_jwt_key_2026
+      - AI_SERVICE_URL=http://applik_ai:3000/api/v1
+      - JOB_SERVICE_URL=http://applik_job:3003/api/v1
+      - PORT=3002
+    ports:
+      - "3002:3002"
+    depends_on:
+      - postgres-ai
+      - ai-service
+      - job-service
+    networks:
+      - applik_network
+    restart: unless-stopped
+
+  job-service:
+    build:
+      context: ./microservices/job-service
+    container_name: applik_job
+    env_file: 
+      - ./microservices/job-service/.env
+    environment:
+      - JOB_DB_HOST=applik_postgres
+      - JOB_DB_NAME=talent_db
+      - JOB_DB_UNAME=admin
+      - JOB_DB_PASSWORD=adminpassword
+      - JWT_SECRET=applik_super_secret_jwt_key_2026
+      - PORT=3003
+    ports:
+      - "3003:3003"
+    depends_on:
+      - postgres-ai
+    networks:
+      - applik_network
+    restart: unless-stopped
+
+volumes:
+  applik_pgdata:

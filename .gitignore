@@ -13,6 +13,7 @@ node_modules/
 
 # Docker
 .dockerignore
+.docker-compose.yml
 
 # OS files
 .DS_Store
@@ -21,3 +22,9 @@ Thumbs.db
 # Build folders
 dist/
 build/
+# Documentación
+docs/
+
+# Tests
+tests/
+test_output.txt
