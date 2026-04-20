@@ -186,12 +186,8 @@ const LoginPage = () => {
                         {/* Submit */}
                         <button
                             type="submit"
-<<<<<<< HEAD
                             disabled={loading}
                             className="w-full bg-violet-600 hover:bg-violet-700 hover:shadow-lg hover:shadow-violet-200 hover:-translate-y-0.5 text-white font-semibold py-2.5 rounded-xl transition-all duration-200 active:scale-[0.98] text-sm mt-2 disabled:opacity-60 disabled:pointer-events-none"
-=======
-                            className="w-full bg-violet-600 hover:bg-violet-700 hover:shadow-lg hover:shadow-violet-200 hover:-translate-y-0.5 text-white font-semibold py-2.5 rounded-xl transition-all duration-200 active:scale-[0.98] text-sm mt-2"
->>>>>>> 10a69ac5651495fa8d6fa22e95863389713f9086
                         >
                             {loading ? "Ingresando..." : "Entrar"}
                         </button>

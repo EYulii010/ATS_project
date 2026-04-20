@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, User, Mail, Lock, CheckCircle2 } from "lucide-react";
 import Logo from "@/components/ui/Logo";
 import { useAuth } from "@/context/AuthContext";
-<<<<<<< HEAD
 import { registerApplicant } from "@/api/auth";
 
 const RegistroCandidatoPage = () => {
@@ -17,22 +16,10 @@ const RegistroCandidatoPage = () => {
     const [showConfirmar,   setShowConfirmar]   = useState(false);
     const [error,           setError]           = useState("");
     const [loading,         setLoading]         = useState(false);
-=======
-
-const RegistroCandidatoPage = () => {
-    const [nombre,          setNombre]          = useState("");
-    const [email,           setEmail]           = useState("");
-    const [password,        setPassword]        = useState("");
-    const [confirmar,       setConfirmar]       = useState("");
-    const [showPassword,    setShowPassword]    = useState(false);
-    const [showConfirmar,   setShowConfirmar]   = useState(false);
-    const [error,           setError]           = useState("");
->>>>>>> 10a69ac5651495fa8d6fa22e95863389713f9086
 
     const { login } = useAuth();
     const navigate  = useNavigate();
 
-<<<<<<< HEAD
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (password !== confirmar) { setError("Las contraseñas no coinciden"); return; }
@@ -48,18 +35,6 @@ const RegistroCandidatoPage = () => {
         } finally {
             setLoading(false);
         }
-=======
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (password !== confirmar) {
-            setError("Las contraseñas no coinciden");
-            return;
-        }
-        setError("");
-        // Mock registro hasta conectar backend
-        login({ id: Date.now(), name: nombre, email, role: "aplicante", tenant_name: null, avatar_color: "from-purple-500 to-purple-700" });
-        navigate("/trabajos");
->>>>>>> 10a69ac5651495fa8d6fa22e95863389713f9086
     };
 
     return (
@@ -82,10 +57,6 @@ const RegistroCandidatoPage = () => {
                         Crea tu perfil y conecta con las mejores empresas de Nicaragua en segundos.
                     </p>
 
-<<<<<<< HEAD
-=======
-                    {/* Beneficios */}
->>>>>>> 10a69ac5651495fa8d6fa22e95863389713f9086
                     <div className="w-full max-w-sm space-y-3 mt-4">
                         {[
                             "Match IA con vacantes que encajan contigo",
@@ -100,13 +71,7 @@ const RegistroCandidatoPage = () => {
                     </div>
                 </div>
 
-<<<<<<< HEAD
                 <p className="text-purple-300 text-xs">© 2026 Applik. Plataforma de reclutamiento impulsada por IA.</p>
-=======
-                <p className="text-purple-300 text-xs">
-                    © 2026 Applik. Plataforma de reclutamiento impulsada por IA.
-                </p>
->>>>>>> 10a69ac5651495fa8d6fa22e95863389713f9086
 
                 <div className="absolute -bottom-24 -right-24 w-72 h-72 rounded-full bg-white/5" />
                 <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-white/5" />
@@ -115,18 +80,9 @@ const RegistroCandidatoPage = () => {
             {/* ── Panel derecho ── */}
             <div className="flex-1 flex flex-col justify-center items-center bg-white px-6 py-10 sm:px-10">
 
-<<<<<<< HEAD
                 <div className="flex md:hidden flex-col items-center gap-3 mb-8">
                     <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: "linear-gradient(150deg, #8B7CF6 0%, #514990 100%)" }}>
                         <div style={{ filter: "brightness(0) invert(1)" }}><Logo className="w-9 h-9" /></div>
-=======
-                {/* Logo mobile */}
-                <div className="flex md:hidden flex-col items-center gap-3 mb-8">
-                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: "linear-gradient(150deg, #8B7CF6 0%, #514990 100%)" }}>
-                        <div style={{ filter: "brightness(0) invert(1)" }}>
-                            <Logo className="w-9 h-9" />
-                        </div>
->>>>>>> 10a69ac5651495fa8d6fa22e95863389713f9086
                     </div>
                     <span className="text-slate-900 text-xl font-bold tracking-wide">APPLIK</span>
                 </div>
@@ -137,7 +93,6 @@ const RegistroCandidatoPage = () => {
 
                     <form onSubmit={handleSubmit} className="space-y-4">
 
-<<<<<<< HEAD
                         {/* Nombre + Apellido */}
                         <div className="grid grid-cols-2 gap-3">
                             <div>
@@ -154,21 +109,6 @@ const RegistroCandidatoPage = () => {
                                 <input type="text" placeholder="Tu apellido" value={lastName}
                                     onChange={(e) => setLastName(e.target.value)} required
                                     className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all" />
-=======
-                        {/* Nombre */}
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1.5">Nombre completo</label>
-                            <div className="relative">
-                                <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
-                                <input
-                                    type="text"
-                                    placeholder="Tu nombre completo"
-                                    value={nombre}
-                                    onChange={(e) => setNombre(e.target.value)}
-                                    required
-                                    className="w-full border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
-                                />
->>>>>>> 10a69ac5651495fa8d6fa22e95863389713f9086
                             </div>
                         </div>
 
@@ -177,20 +117,9 @@ const RegistroCandidatoPage = () => {
                             <label className="block text-sm font-medium text-slate-700 mb-1.5">Correo electrónico</label>
                             <div className="relative">
                                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
-<<<<<<< HEAD
                                 <input type="email" placeholder="tu@correo.com" value={email}
                                     onChange={(e) => setEmail(e.target.value)} required
                                     className="w-full border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all" />
-=======
-                                <input
-                                    type="email"
-                                    placeholder="tu@correo.com"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                    className="w-full border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
-                                />
->>>>>>> 10a69ac5651495fa8d6fa22e95863389713f9086
                             </div>
                         </div>
 
@@ -199,20 +128,9 @@ const RegistroCandidatoPage = () => {
                             <label className="block text-sm font-medium text-slate-700 mb-1.5">Contraseña</label>
                             <div className="relative">
                                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
-<<<<<<< HEAD
                                 <input type={showPassword ? "text" : "password"} placeholder="Mínimo 8 caracteres" value={password}
                                     onChange={(e) => setPassword(e.target.value)} required
                                     className="w-full border border-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all" />
-=======
-                                <input
-                                    type={showPassword ? "text" : "password"}
-                                    placeholder="Mínimo 8 caracteres"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                    className="w-full border border-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
-                                />
->>>>>>> 10a69ac5651495fa8d6fa22e95863389713f9086
                                 <button type="button" onClick={() => setShowPassword(v => !v)}
                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors" tabIndex={-1}>
                                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -225,30 +143,16 @@ const RegistroCandidatoPage = () => {
                             <label className="block text-sm font-medium text-slate-700 mb-1.5">Confirmar contraseña</label>
                             <div className="relative">
                                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
-<<<<<<< HEAD
                                 <input type={showConfirmar ? "text" : "password"} placeholder="Repite tu contraseña" value={confirmar}
                                     onChange={(e) => { setConfirmar(e.target.value); setError("") }} required
                                     className={`w-full border rounded-xl pl-10 pr-10 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
                                         error ? "border-red-400 focus:ring-red-400" : "border-slate-200 focus:ring-violet-400 focus:border-transparent"
                                     }`} />
-=======
-                                <input
-                                    type={showConfirmar ? "text" : "password"}
-                                    placeholder="Repite tu contraseña"
-                                    value={confirmar}
-                                    onChange={(e) => { setConfirmar(e.target.value); setError("") }}
-                                    required
-                                    className={`w-full border rounded-xl pl-10 pr-10 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
-                                        error ? "border-red-400 focus:ring-red-400" : "border-slate-200 focus:ring-violet-400 focus:border-transparent"
-                                    }`}
-                                />
->>>>>>> 10a69ac5651495fa8d6fa22e95863389713f9086
                                 <button type="button" onClick={() => setShowConfirmar(v => !v)}
                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors" tabIndex={-1}>
                                     {showConfirmar ? <EyeOff size={16} /> : <Eye size={16} />}
                                 </button>
                             </div>
-<<<<<<< HEAD
                         </div>
 
                         {/* Ley 787 */}
@@ -266,36 +170,16 @@ const RegistroCandidatoPage = () => {
                         <button type="submit" disabled={loading}
                             className="w-full bg-violet-600 hover:bg-violet-700 hover:shadow-lg hover:shadow-violet-200 hover:-translate-y-0.5 text-white font-semibold py-2.5 rounded-xl transition-all duration-200 active:scale-[0.98] text-sm mt-2 disabled:opacity-60 disabled:pointer-events-none">
                             {loading ? "Creando cuenta..." : "Crear cuenta"}
-=======
-                            {error && <p className="mt-1.5 text-xs text-red-500">{error}</p>}
-                        </div>
-
-                        <button type="submit"
-                            className="w-full bg-violet-600 hover:bg-violet-700 hover:shadow-lg hover:shadow-violet-200 hover:-translate-y-0.5 text-white font-semibold py-2.5 rounded-xl transition-all duration-200 active:scale-[0.98] text-sm mt-2">
-                            Crear cuenta
->>>>>>> 10a69ac5651495fa8d6fa22e95863389713f9086
                         </button>
                     </form>
 
                     <p className="text-center text-sm text-slate-500 mt-6">
                         ¿Ya tienes cuenta?{" "}
-<<<<<<< HEAD
                         <Link to="/login" className="text-violet-600 hover:text-violet-700 font-medium">Iniciar sesión</Link>
                     </p>
                     <p className="text-center text-sm text-slate-400 mt-2">
                         ¿Eres una empresa?{" "}
                         <Link to="/registrar-empresa" className="text-violet-600 hover:text-violet-700 font-medium">Regístrate aquí</Link>
-=======
-                        <Link to="/login" className="text-violet-600 hover:text-violet-700 font-medium">
-                            Iniciar sesión
-                        </Link>
-                    </p>
-                    <p className="text-center text-sm text-slate-400 mt-2">
-                        ¿Eres una empresa?{" "}
-                        <Link to="/registrar-empresa" className="text-violet-600 hover:text-violet-700 font-medium">
-                            Regístrate aquí
-                        </Link>
->>>>>>> 10a69ac5651495fa8d6fa22e95863389713f9086
                     </p>
                 </div>
             </div>
