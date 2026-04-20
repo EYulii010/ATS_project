@@ -1,24 +1,39 @@
 services:
+  # Proxy de seguridad que traduce el dialecto Docker v1.24 (Traefik) al v1.54 (Servidor)
+  socket-proxy:
+    image: tecnativa/docker-socket-proxy
+    container_name: ats_socket_proxy
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      CONTAINERS: 1
+      NETWORKS: 1
+      SERVICES: 1
+      POST: 0
+    networks:
+      - ats_network
+
   reverse-proxy:
     image: traefik:v3.1
     container_name: ats_proxy
-    environment:
-      - DOCKER_API_VERSION=1.40
+    depends_on:
+      - socket-proxy
     command:
       - "--api.insecure=false"
       - "--providers.docker=true"
+      - "--providers.docker.endpoint=tcp://socket-proxy:2375"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
       - "--certificatesresolvers.myresolver.acme.email=cristes25@gmail.com"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-      - "--log.level=DEBUG"
+      - "--log.level=INFO"
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "./letsencrypt:/letsencrypt"
     restart: unless-stopped
     networks:
