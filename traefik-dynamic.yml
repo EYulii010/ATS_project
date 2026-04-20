@@ -28,14 +28,14 @@ http:
     auth-service:
       loadBalancer:
         servers:
-          - url: "http://applik_auth_prod:3001"
+          - url: "http://auth-service:3001"
 
     job-service:
       loadBalancer:
         servers:
-          - url: "http://applik_job_prod:3003"
+          - url: "http://job-service:3003"
 
     talent-service:
       loadBalancer:
         servers:
-          - url: "http://applik_talent_prod:3002"
+          - url: "http://talent-service:3002"
