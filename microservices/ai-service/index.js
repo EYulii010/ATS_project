@@ -16,8 +16,26 @@ const jobRoutes = require('./src/routes/jobRoutes');
 
 const app = express();
 
+// --- CORS (debe ir ANTES de helmet) ---
+const allowedOrigins = [
+    'http://localhost:5173',
+    'https://app.applik-ni.com',
+    'https://applik-ni.com',
+    'https://www.applik-ni.com'
+];
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (allowedOrigins.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+    }
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    if (req.method === 'OPTIONS') return res.sendStatus(200);
+    next();
+});
+
 // --- Middleware principal ---
-app.use(helmet()); // Aplicar cabeceras de seguridad temprano
+app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(express.json()); // Middleware para parsear cuerpos de solicitud JSON
 app.use(compression()); // Comprimir todas las rutas
 
