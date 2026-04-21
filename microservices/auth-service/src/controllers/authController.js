@@ -31,7 +31,7 @@ exports.handleLogin = async (request, reply) => {
     } else {
       const tenant = await Tenant.findOne({ where: { id: user.tenant_id } });
       if (!tenant) return reply.code(401).send({ message: 'Company information not found.' });
-      
+
       isSubscriptionActive = tenant.active_subscription;
       userType = "employee";
     }
@@ -41,8 +41,8 @@ exports.handleLogin = async (request, reply) => {
 
     if (isMatch) {
       // Payload se define aquí !!!
-      const jwtToken = request.server.jwt.sign({ 
-        user_id: user.id, 
+      const jwtToken = request.server.jwt.sign({
+        user_id: user.id,
         role: user.role,
         company_id: user.tenant_id,
         active_subscription: isSubscriptionActive,
@@ -68,7 +68,7 @@ exports.handleLogin = async (request, reply) => {
 
       return reply.send({ token: jwtToken });
     }
-    
+
     return reply.code(401).send({ message: 'Credenciales inválidas' });
 
   } catch (error) {
@@ -80,22 +80,22 @@ exports.handleLogin = async (request, reply) => {
 exports.handleRegisterApplicant = async (request, reply) => {
   const { email, password, first_name, last_name, law_787_accepted } = request.body;
 
-  try {  
+  try {
     const passwordCheck = validatePasswordStrength(password);
-    if (!passwordCheck.isValid){
-        return reply.code(400).send({
-            success: false,
-            field: "password", // Le decimos al frontend qué campo falló
-            message: passwordCheck.message
-        });
+    if (!passwordCheck.isValid) {
+      return reply.code(400).send({
+        success: false,
+        field: "password", // Le decimos al frontend qué campo falló
+        message: passwordCheck.message
+      });
     }
-    
+
     if (!law_787_accepted) {
       console.error("El usuario no a aceptado la ley 787");
       return reply.code(400).send({ error: "El usuario no ha aceptado la ley 787" });
     }
 
-    if (await checkIfUserExists(email)){
+    if (await checkIfUserExists(email)) {
       console.error(`Usuario con correo ${email} ya existe.`);
       return reply.code(400).send({ error: `Usuario con correo ${email} ya existe.` });
     }
@@ -111,19 +111,19 @@ exports.handleRegisterApplicant = async (request, reply) => {
     const payload = {
       user_id: createdApplicant.id,
       role: "aplicante",
-      active_subscription: null, 
+      active_subscription: null,
       company_id: null,
     };
 
     const jwtToken = await reply.jwtSign(payload);
 
     const sessionExpiry = new Date();
-    sessionExpiry.setHours(sessionExpiry.getHours() + 8);
+    sessionExpiry.setHours(sessionExpiry.getHours() + 2);
 
     await Session.create({
-        token: jwtToken,
-        candidate_id: createdApplicant.id, // Corregido el typo aquí
-        expires_at: sessionExpiry
+      token: jwtToken,
+      candidate_id: createdApplicant.id, // Corregido el typo aquí
+      expires_at: sessionExpiry
     });
 
     return reply.code(201).send({
@@ -160,13 +160,13 @@ exports.handleRegisterOrganization = async (request, reply) => {
   }
 
   const passwordCheck = validatePasswordStrength(password);
-    if (!passwordCheck.isValid){
-        return reply.code(400).send({
-            success: false,
-            field: "password", // Le decimos al frontend qué campo falló
-            message: passwordCheck.message
-        });
-    }
+  if (!passwordCheck.isValid) {
+    return reply.code(400).send({
+      success: false,
+      field: "password", // Le decimos al frontend qué campo falló
+      message: passwordCheck.message
+    });
+  }
 
   // Validar Email único
   if (await checkIfUserExists(adminEmail)) {
@@ -196,7 +196,7 @@ exports.handleRegisterOrganization = async (request, reply) => {
       RUC,
       active_subscription: true, // hardcoded para demo
     }, { transaction });
-    
+
     // Crear usuario admin
     const createdAdmin = await Employee.create({
       email: adminEmail,
@@ -207,9 +207,9 @@ exports.handleRegisterOrganization = async (request, reply) => {
       role: "admin",
       law_787_accepted
     }, { transaction });
-    
+
     await transaction.commit();
-    
+
     // creando token para iniciar sesión del admin
     const payload = {
       user_id: createdAdmin.id,
@@ -226,7 +226,7 @@ exports.handleRegisterOrganization = async (request, reply) => {
 
     await Session.create({
       token: token,
-      employee_id: createdAdmin.id, 
+      employee_id: createdAdmin.id,
       expires_at: sessionExpiry
     });
 
@@ -236,7 +236,7 @@ exports.handleRegisterOrganization = async (request, reply) => {
       data: {
         tenant_id: createdTenant.id,
         admin_id: createdAdmin.id,
-        token: token 
+        token: token
       }
     });
 
@@ -250,68 +250,68 @@ exports.handleRegisterOrganization = async (request, reply) => {
 };
 
 exports.getMe = async (request, reply) => {
-  try{
+  try {
     const { role, user_id } = request.user;
 
     let responseData = {};
 
-    if (role === "admin" || role === "reclutador"){
-        const user = await Employee.findOne({
-          where: {id: user_id},
-          include: {
-            model: Tenant,
-            attributes: ['business_name']
-          }
-        });
-
-        if (!user) return reply.code(404).send({ success: false, message: "Usuario no encontrado" });
-
-        responseData = {
-          name: `${user.first_name} ${user.last_name}`,
-          email: user.email,
-          tenant_name: user.Tenant ? user.Tenant.business_name : null
-        };
-
-      } else if ( role === "aplicante") {
-        
-        const user = await Candidate.findOne({where: {id: user_id}});
-        
-        if (!user) return reply.code(404).send({ success: false, message: "Usuario no encontrado" });
-
-        responseData = {
-          name: `${user.first_name} ${user.last_name}`,
-          email: user.email,
-          tenant_name: null
+    if (role === "admin" || role === "reclutador") {
+      const user = await Employee.findOne({
+        where: { id: user_id },
+        include: {
+          model: Tenant,
+          attributes: ['business_name']
         }
-      }
-
-      return reply.code(200).send({
-        success: true,
-        data: responseData
       });
-    } catch (error) {
-      request.log.error(error);
-      return reply.code(500).send({
-        success: false,
-        message: "Error del servidor al recuperar información de usuario"
-      })
+
+      if (!user) return reply.code(404).send({ success: false, message: "Usuario no encontrado" });
+
+      responseData = {
+        name: `${user.first_name} ${user.last_name}`,
+        email: user.email,
+        tenant_name: user.Tenant ? user.Tenant.business_name : null
+      };
+
+    } else if (role === "aplicante") {
+
+      const user = await Candidate.findOne({ where: { id: user_id } });
+
+      if (!user) return reply.code(404).send({ success: false, message: "Usuario no encontrado" });
+
+      responseData = {
+        name: `${user.first_name} ${user.last_name}`,
+        email: user.email,
+        tenant_name: null
+      }
     }
+
+    return reply.code(200).send({
+      success: true,
+      data: responseData
+    });
+  } catch (error) {
+    request.log.error(error);
+    return reply.code(500).send({
+      success: false,
+      message: "Error del servidor al recuperar información de usuario"
+    })
+  }
 }
 
 exports.handleLogout = async (request, reply) => {
   try {
     const authHeader = request.headers.authorization;
-    if(!authHeader){
+    if (!authHeader) {
       return reply.code(401).send({ success: false, message: "Token no proporcionado" });
     }
 
     const token = authHeader.split(' ')[1];
 
     const deletedSession = await Session.destroy({
-      where: {token: token}
+      where: { token: token }
     });
 
-    if (deletedSession === 0){
+    if (deletedSession === 0) {
       return reply.code(400).send({ success: false, message: "Sesión no encontrada o ya cerrada" });
     }
 

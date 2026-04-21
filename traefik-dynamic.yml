@@ -8,6 +8,15 @@ http:
       tls:
         certResolver: myresolver
 
+    # Ruta específica para AI - DEBE ir ANTES que la regla general de /api/v1/jobs
+    ai-generate:
+      rule: "Host(`api.applik-ni.com`) && PathPrefix(`/api/v1/jobs/generate-description`)"
+      entryPoints:
+        - websecure
+      service: ai-service
+      tls:
+        certResolver: myresolver
+
     job:
       rule: "Host(`api.applik-ni.com`) && PathPrefix(`/api/v1/jobs`)"
       entryPoints:
@@ -39,3 +48,8 @@ http:
       loadBalancer:
         servers:
           - url: "http://talent-service:3002"
+
+    ai-service:
+      loadBalancer:
+        servers:
+          - url: "http://ai-service:3000"
