@@ -20,10 +20,21 @@ class IngestCandidateUseCase {
 
         try {
             // 1. Invocamos asíncronamente al AI Bridge (Integración de microservicios)
-            const extractedData = await aiClient.extractCvData(rawCvText);
+            let extractedData;
+            try {
+                extractedData = await aiClient.extractCvData(rawCvText);
+            } catch {
+                extractedData = null;
+            }
 
-            if (!extractedData.personal_info) {
-                throw new Error('El modelo generativo no logró estructurar este CV.');
+            if (!extractedData || !extractedData.personal_info) {
+                extractedData = {
+                    personal_info: { name: 'Candidato', location: '', phone: '', email: '' },
+                    summary: 'CV recibido — análisis pendiente',
+                    work_experiences: [],
+                    educations: [],
+                    skills: []
+                };
             }
 
             // 1.5 Alternativa Local a S3 (Cero Costos)

@@ -33,7 +33,7 @@ class CandidateController {
             if (error.message.includes('Ley 787')) {
                 return reply.code(403).send({ error: error.message });
             }
-            return reply.code(500).send({ error: 'Fallo al procesar postulación pública' });
+            return reply.code(500).send({ error: error.message || 'Fallo al procesar postulación pública' });
         }
     }
 
