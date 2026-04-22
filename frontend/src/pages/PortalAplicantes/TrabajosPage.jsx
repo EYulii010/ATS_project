@@ -286,13 +286,15 @@ function JobCard({ job }) {
 
 // ─── Página principal ─────────────────────────────────────────────────────────
 
-function getTenantIdFromToken() {
+function getTenantId() {
   try {
     const token = localStorage.getItem("applik_token")
-    if (!token) return null
-    const payload = JSON.parse(atob(token.split(".")[1]))
-    return payload.company_id ?? null
-  } catch { return null }
+    if (token) {
+      const payload = JSON.parse(atob(token.split(".")[1]))
+      if (payload.company_id) return payload.company_id
+    }
+  } catch { /* ignorar */ }
+  return localStorage.getItem("applik_tenant_id") ?? null
 }
 
 export default function TrabajosPage() {
@@ -303,6 +305,7 @@ export default function TrabajosPage() {
   const [pagina,          setPagina]          = useState(1)
   const [filtrosMobile,   setFiltrosMobile]   = useState(false)
   const [vacantesReales,  setVacantesReales]  = useState([])
+  const [cargando,        setCargando]        = useState(false)
 
   const [filtros, setFiltros] = useState({
     categorias:  [],
@@ -313,12 +316,14 @@ export default function TrabajosPage() {
   const [filtrosAplicados, setFiltrosAplicados] = useState(filtros)
 
   useEffect(() => {
-    const tenantId = getTenantIdFromToken() ?? searchParams.get("empresa")
+    const tenantId = getTenantId() ?? searchParams.get("empresa")
     if (!tenantId) return
+    setCargando(true)
     fetch(`${import.meta.env.VITE_JOB_SERVICE_URL}/api/v1/jobs/public?tenant_id=${tenantId}`)
       .then(r => r.json())
       .then(data => { if (Array.isArray(data.data)) setVacantesReales(data.data) })
       .catch(() => {})
+      .finally(() => setCargando(false))
   }, [])
 
   const toggleFiltro = (clave, valor) => {
@@ -337,7 +342,7 @@ export default function TrabajosPage() {
     setFiltrosMobile(false)
   }
 
-  const listaBase = vacantesReales.length > 0 ? vacantesReales : trabajos
+  const listaBase = cargando ? [] : vacantesReales.length > 0 ? vacantesReales : trabajos
 
   const resultados = listaBase.filter((j) => {
     const titulo  = j.titulo ?? j.title ?? ""

@@ -20,6 +20,8 @@ export const AuthProvider = ({ children }) => {
     getMe(token)
       .then(({ data }) => {
         const role = parseRole(token)
+        const companyId = parseCompanyId(token)
+        if (companyId) localStorage.setItem("applik_tenant_id", companyId)
         setUser({ ...data, role, avatar_color: AVATAR_COLORS[role] ?? AVATAR_COLORS.aplicante })
       })
       .catch(() => {
@@ -29,7 +31,6 @@ export const AuthProvider = ({ children }) => {
   }, [])
 
   const login = async (tokenOrUser) => {
-    // Dev login pasa un objeto de usuario directamente (sin backend)
     if (typeof tokenOrUser === "object") {
       setUser(tokenOrUser)
       return
@@ -37,6 +38,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("applik_token", tokenOrUser)
     const { data } = await getMe(tokenOrUser)
     const role = parseRole(tokenOrUser)
+    const companyId = parseCompanyId(tokenOrUser)
+    if (companyId) localStorage.setItem("applik_tenant_id", companyId)
     setUser({ ...data, role, avatar_color: AVATAR_COLORS[role] ?? AVATAR_COLORS.aplicante })
   }
 
@@ -62,5 +65,14 @@ function parseRole(token) {
     return payload.role ?? "aplicante"
   } catch {
     return "aplicante"
+  }
+}
+
+function parseCompanyId(token) {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]))
+    return payload.company_id ?? null
+  } catch {
+    return null
   }
 }
