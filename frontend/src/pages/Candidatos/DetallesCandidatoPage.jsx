@@ -1,13 +1,32 @@
 import { useState } from "react"
-import { ArrowLeft, Download } from "lucide-react"
+import { ArrowLeft, Download, CheckCircle2, Clock, Circle } from "lucide-react"
 import { Avatar } from "@/components/ui/Avatar"
 import { StageBadge } from "@/components/ui/StageBadge"
 import { Button } from "@/components/ui/button"
+import { STAGES } from "@/components/ui/StageBadge"
+
+// Genera historial mock realista hasta la etapa actual
+function generarHistorial(etapaActual) {
+  const hoy = new Date(2026, 3, 20) // 20 Abr 2026
+  const offsetDias = [0, 3, 5, 9, 14, 19]
+  const idxActual = STAGES.indexOf(etapaActual)
+  return STAGES.slice(0, idxActual + 1).map((etapa, i) => {
+    const fecha = new Date(hoy)
+    fecha.setDate(hoy.getDate() - (offsetDias[idxActual] - offsetDias[i]))
+    const diasEnEtapa = i < idxActual ? offsetDias[i + 1] - offsetDias[i] : null
+    return {
+      etapa,
+      fecha: fecha.toLocaleDateString("es-NI", { day: "numeric", month: "short", year: "numeric" }),
+      diasEnEtapa,
+    }
+  })
+}
 
 export default function DetallesCandidatoPage({ candidato, onBack, onActualizarEtapa, onDescartar }) {
   if (!candidato) return null
   const [notas,    setNotas]    = useState("")
   const [guardado, setGuardado] = useState(false)
+  const historial = generarHistorial(candidato.etapa)
 
   const handleGuardarNotas = () => {
     if (!notas.trim()) return
@@ -141,6 +160,57 @@ export default function DetallesCandidatoPage({ candidato, onBack, onActualizarE
                     {skill}
                   </span>
                 ))}
+              </div>
+            </div>
+
+            {/* Timeline de etapas */}
+            <div className="rounded-2xl bg-white p-6 shadow-sm">
+              <h2 className="mb-4 font-semibold text-slate-800">Historial de Proceso</h2>
+              <div className="relative">
+                {STAGES.map((etapa, i) => {
+                  const entrada = historial.find((h) => h.etapa === etapa)
+                  const esActual = etapa === candidato.etapa
+                  const completada = !!entrada && !esActual
+                  const pendiente = !entrada
+
+                  return (
+                    <div key={etapa} className="flex gap-3">
+                      {/* Línea + icono */}
+                      <div className="flex flex-col items-center">
+                        <div className={`flex size-6 shrink-0 items-center justify-center rounded-full border-2 ${
+                          esActual   ? "border-violet-500 bg-violet-500"
+                          : completada ? "border-teal-500 bg-teal-500"
+                          : "border-slate-200 bg-white"
+                        }`}>
+                          {esActual    && <div className="size-2 rounded-full bg-white" />}
+                          {completada  && <CheckCircle2 className="size-3.5 text-white" />}
+                          {pendiente   && <Circle className="size-3 text-slate-300" />}
+                        </div>
+                        {i < STAGES.length - 1 && (
+                          <div className={`w-0.5 flex-1 my-1 min-h-[20px] ${completada ? "bg-teal-200" : "bg-slate-100"}`} />
+                        )}
+                      </div>
+
+                      {/* Contenido */}
+                      <div className="pb-4 flex-1 min-w-0">
+                        <p className={`text-sm font-medium leading-tight ${
+                          esActual ? "text-violet-700" : completada ? "text-slate-700" : "text-slate-300"
+                        }`}>
+                          {etapa}
+                          {esActual && <span className="ml-2 text-xs font-normal text-violet-400">actual</span>}
+                        </p>
+                        {entrada && (
+                          <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
+                            <Clock className="size-3" /> {entrada.fecha}
+                          </p>
+                        )}
+                        {entrada?.diasEnEtapa && (
+                          <p className="text-xs text-amber-500 mt-0.5">{entrada.diasEnEtapa} días en esta etapa</p>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             </div>
 

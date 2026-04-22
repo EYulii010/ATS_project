@@ -1,9 +1,12 @@
-import { useState } from "react"
-import { User, Bell, Shield } from "lucide-react"
+import { useState, useEffect } from "react"
+import { useSearchParams } from "react-router-dom"
+import { User, Bell, Shield, Users } from "lucide-react"
 import { ConfigCard } from "@/components/ui/Card"
+import { useAuth } from "@/context/AuthContext"
 import PerfilPage        from "./PerfilPage"
 import NotificacionesPage from "./NotificacionesPage"
 import PrivacidadPage    from "./PrivacidadPage"
+import EquipoPage        from "./EquipoPage"
 
 const secciones = [
   {
@@ -27,11 +30,19 @@ const secciones = [
 ]
 
 export default function ConfiguracionPage() {
-  const [vista, setVista] = useState("menu") // "menu" | "perfil" | "notificaciones" | "privacidad"
+  const { user }       = useAuth()
+  const [searchParams] = useSearchParams()
+  const [vista, setVista] = useState(searchParams.get("s") || "menu")
+
+  useEffect(() => {
+    const s = searchParams.get("s")
+    if (s) setVista(s)
+  }, [searchParams])
 
   if (vista === "perfil")         return <PerfilPage         onBack={() => setVista("menu")} />
   if (vista === "notificaciones") return <NotificacionesPage onBack={() => setVista("menu")} />
   if (vista === "privacidad")     return <PrivacidadPage     onBack={() => setVista("menu")} />
+  if (vista === "equipo")         return <EquipoPage         onBack={() => setVista("menu")} />
 
   return (
     <div className="space-y-6 p-6 bg-applik-bg min-h-screen">
@@ -53,6 +64,14 @@ export default function ConfiguracionPage() {
             onClick={() => setVista(s.key)}
           />
         ))}
+        {user?.role === "admin" && (
+          <ConfigCard
+            icon={Users}
+            title="Equipo"
+            description="Invita reclutadores a tu empresa"
+            onClick={() => setVista("equipo")}
+          />
+        )}
       </div>
 
     </div>

@@ -18,7 +18,7 @@ const trabajos = [
   { id: 7,  titulo: "Ingeniero en Software",  empresa: "Claro",        ubicacion: "Managua", tipo: "Full Time",  categoria: "Tecnología",  nivel: "Senior",   match: "Coincide con tu perfil técnico"                  },
   { id: 8,  titulo: "Analista Financiero",    empresa: "BAC",          ubicacion: "Managua", tipo: "Full Time",  categoria: "Finanzas",    nivel: "Mid-Level", match: "Coincide con tu experiencia en finanzas"         },
   { id: 9,  titulo: "Product Manager",        empresa: "Tigo",         ubicacion: "Managua", tipo: "Full Time",  categoria: "Tecnología",  nivel: "Senior",   match: "Coincide con tu experiencia en gestión"          },
-  { id: 10, titulo: "Community Manager",      empresa: "Pepsi",        ubicacion: "Managua", tipo: "Remoto",     categoria: "Marketing",   nivel: "Junior",   match: "Coincide con tu experiencia en redes sociales"   },
+  { id: 10, titulo: "Community Manager",      empresa: "Pepsi",        ubicacion: "Managua", tipo: "Remoto",     categoria: "Marketing",   nivel: "Junior",   match: "Coincide con tu experiencia en marketing digital"   },
 ]
 
 const ubicaciones  = ["Managua", "León", "Granada", "Masaya"]

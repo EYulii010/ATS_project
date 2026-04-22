@@ -4,6 +4,7 @@ import { Eye, EyeOff, User, Mail, Lock, CheckCircle2 } from "lucide-react";
 import Logo from "@/components/ui/Logo";
 import { useAuth } from "@/context/AuthContext";
 import { registerApplicant } from "@/api/auth";
+import Ley787Modal from "@/components/ui/Ley787Modal";
 
 const RegistroCandidatoPage = () => {
     const [firstName,       setFirstName]       = useState("");
@@ -12,6 +13,7 @@ const RegistroCandidatoPage = () => {
     const [password,        setPassword]        = useState("");
     const [confirmar,       setConfirmar]       = useState("");
     const [law787,          setLaw787]          = useState(false);
+    const [modalLey,        setModalLey]        = useState(false);
     const [showPassword,    setShowPassword]    = useState(false);
     const [showConfirmar,   setShowConfirmar]   = useState(false);
     const [error,           setError]           = useState("");
@@ -157,13 +159,22 @@ const RegistroCandidatoPage = () => {
 
                         {/* Ley 787 */}
                         <label className="flex items-start gap-2.5 cursor-pointer">
-                            <input type="checkbox" checked={law787} onChange={(e) => { setLaw787(e.target.checked); setError("") }}
-                                className="mt-0.5 w-4 h-4 rounded border-slate-300 text-violet-600 focus:ring-violet-400 shrink-0" />
+                            <input type="checkbox" checked={law787} readOnly
+                                className="mt-0.5 w-4 h-4 rounded border-slate-300 text-violet-600 focus:ring-violet-400 shrink-0 cursor-pointer" />
                             <span className="text-xs text-slate-500 leading-relaxed">
-                                Acepto el tratamiento de mis datos personales conforme a la{" "}
-                                <span className="font-medium text-slate-700">Ley 787 de Protección de Datos Personales</span> de Nicaragua.
+                                He leído y acepto el tratamiento de mis datos personales conforme a la{" "}
+                                <button type="button" onClick={() => setModalLey(true)}
+                                    className="font-medium text-violet-600 hover:text-violet-700 underline underline-offset-2 transition-colors">
+                                    Ley 787 de Protección de Datos Personales
+                                </button>{" "}de Nicaragua.
                             </span>
                         </label>
+                        {modalLey && (
+                            <Ley787Modal
+                                onAceptar={() => { setLaw787(true); setModalLey(false); setError("") }}
+                                onCerrar={() => setModalLey(false)}
+                            />
+                        )}
 
                         {error && <p className="text-xs text-red-500">{error}</p>}
 

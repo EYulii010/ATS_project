@@ -1,12 +1,12 @@
 import { useState } from "react"
-import { Users, Briefcase, TrendingUp, Clock } from "lucide-react"
+import { Users, Briefcase, TrendingUp, Clock, Sparkles, AlertTriangle, Info, CheckCircle2 } from "lucide-react"
 import { StatCard, Card, CardContent } from "@/components/ui/Card"
 import {
   AreaChart, Area,
   BarChart, Bar,
   PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer,
+  ResponsiveContainer, LabelList,
 } from "recharts"
 
 const periodos = ["Trimestral", "Anual", "Por Fecha"]
@@ -35,6 +35,66 @@ const departamentosData = [
 ]
 
 const deptoColores = ["#4F46E5", "#06B6D4", "#8B5CF6", "#10B981", "#F59E0B"]
+
+// Días promedio por etapa — colores según urgencia
+const embudo = [
+  { etapa: "Recibido",        dias: 2,  color: "#10B981" },
+  { etapa: "Analizado",       dias: 4,  color: "#10B981" },
+  { etapa: "Seleccionado",    dias: 9,  color: "#F59E0B" },
+  { etapa: "Bajo Entrevista", dias: 12, color: "#EF4444" },
+  { etapa: "Oferta Enviada",  dias: 3,  color: "#10B981" },
+  { etapa: "Contratado",      dias: 1,  color: "#10B981" },
+]
+
+const sugerenciasIA = [
+  {
+    tipo: "critico",
+    icon: AlertTriangle,
+    color: "text-red-500",
+    bg: "bg-red-50",
+    border: "border-red-100",
+    titulo: "Cuello de botella crítico: Bajo Entrevista",
+    texto: "Los candidatos permanecen en promedio 12 días en esta etapa. Considera dividir las entrevistas en paralelo o asignar un segundo entrevistador para reducir el tiempo de espera.",
+  },
+  {
+    tipo: "advertencia",
+    icon: AlertTriangle,
+    color: "text-amber-500",
+    bg: "bg-amber-50",
+    border: "border-amber-100",
+    titulo: "Demora en etapa Seleccionado (9 días)",
+    texto: "El tiempo entre la revisión del CV y el inicio de entrevistas es elevado. Se recomienda establecer un máximo de 5 días para pasar candidatos seleccionados a entrevistas.",
+  },
+  {
+    tipo: "info",
+    icon: Info,
+    color: "text-blue-500",
+    bg: "bg-blue-50",
+    border: "border-blue-100",
+    titulo: "Riesgo de pérdida de talento",
+    texto: "Con un promedio de 21 días entre 'Recibido' y 'Oferta Enviada', existe alto riesgo de que candidatos calificados reciban otras ofertas. El mercado laboral en Tecnología tiene un tiempo de respuesta promedio de 10–14 días.",
+  },
+  {
+    tipo: "positivo",
+    icon: CheckCircle2,
+    color: "text-teal-500",
+    bg: "bg-teal-50",
+    border: "border-teal-100",
+    titulo: "Proceso de oferta eficiente",
+    texto: "Una vez enviada la oferta, el cierre ocurre en 1 día promedio. Esto indica buena alineación de expectativas salariales desde etapas tempranas.",
+  },
+]
+
+function TooltipEmbudo({ active, payload }) {
+  if (!active || !payload?.length) return null
+  const d = payload[0].payload
+  return (
+    <div className="rounded-xl border border-slate-100 bg-white px-3 py-2 shadow-lg text-xs">
+      <p className="font-semibold text-slate-700">{d.etapa}</p>
+      <p className="text-slate-500">{d.dias} días promedio</p>
+    </div>
+  )
+}
 
 const matchData = [
   { name: "Match Alto",  value: 42, color: "#4F46E5" },
@@ -215,6 +275,65 @@ export default function EstadisticasPage() {
               </Bar>
             </BarChart>
           </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      {/* Embudo de tiempo por etapa */}
+      <Card>
+        <CardContent>
+          <div className="flex items-start justify-between mb-1">
+            <div>
+              <p className="text-sm font-semibold text-slate-800">Tiempo Promedio por Etapa</p>
+              <p className="text-xs text-slate-400 mt-0.5">Días que un candidato permanece en cada etapa del proceso</p>
+            </div>
+            <div className="flex items-center gap-3 text-xs text-slate-400 shrink-0">
+              <span className="flex items-center gap-1"><span className="inline-block size-2.5 rounded-full bg-green-500"/>≤ 4 días</span>
+              <span className="flex items-center gap-1"><span className="inline-block size-2.5 rounded-full bg-amber-400"/>5–8 días</span>
+              <span className="flex items-center gap-1"><span className="inline-block size-2.5 rounded-full bg-red-400"/>{">"} 8 días</span>
+            </div>
+          </div>
+          <ResponsiveContainer width="100%" height={240}>
+            <BarChart data={embudo} layout="vertical" margin={{ top: 8, right: 48, left: 10, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" horizontal={false} />
+              <XAxis type="number" tick={{ fontSize: 11, fill: "#94A3B8" }} unit=" días" />
+              <YAxis type="category" dataKey="etapa" tick={{ fontSize: 11, fill: "#64748B" }} width={110} />
+              <Tooltip content={<TooltipEmbudo />} />
+              <Bar dataKey="dias" radius={[0, 6, 6, 0]} maxBarSize={28}>
+                {embudo.map((e, i) => <Cell key={i} fill={e.color} fillOpacity={0.85} />)}
+                <LabelList dataKey="dias" position="right" formatter={(v) => `${v}d`} style={{ fontSize: 11, fill: "#64748B" }} />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      {/* Sugerencias IA */}
+      <Card>
+        <CardContent>
+          <div className="flex items-center gap-2 mb-4">
+            <div className="flex size-8 items-center justify-center rounded-xl bg-violet-100">
+              <Sparkles className="size-4 text-violet-600" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-slate-800">Sugerencias de la IA</p>
+              <p className="text-xs text-slate-400">Basadas en los tiempos del proceso actual</p>
+            </div>
+            <span className="ml-auto text-xs text-slate-400 bg-slate-100 rounded-full px-2.5 py-1">Mock — conectar con AI service</span>
+          </div>
+          <div className="space-y-3">
+            {sugerenciasIA.map((s, i) => {
+              const Icon = s.icon
+              return (
+                <div key={i} className={`flex gap-3 rounded-xl border p-4 ${s.bg} ${s.border}`}>
+                  <Icon className={`size-4 shrink-0 mt-0.5 ${s.color}`} />
+                  <div>
+                    <p className={`text-sm font-semibold ${s.color}`}>{s.titulo}</p>
+                    <p className="text-xs text-slate-600 mt-1 leading-relaxed">{s.texto}</p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </CardContent>
       </Card>
 

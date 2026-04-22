@@ -27,12 +27,12 @@ const Header = ({ onMenuToggle }) => {
             <div className="flex items-center gap-2 md:gap-4">
                 <Link
                     className="group relative transition-transform duration-200 active:scale-95 hover:bg-slate-100 p-2 rounded-full"
-                    to="configuracion/notificaciones"
+                    to="/configuracion?s=notificaciones"
                 >
                     <Bell className="w-5 h-5 md:w-7 md:h-7" />
                 </Link>
                 <Link
-                    to="/configuracion/perfil"
+                    to="/configuracion?s=perfil"
                     className="group relative transition-transform duration-200 active:scale-95 rounded-full hover:bg-slate-100"
                     aria-label="Ver Perfil"
                 >

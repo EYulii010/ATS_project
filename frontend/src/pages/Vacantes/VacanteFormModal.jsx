@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Input, Textarea } from "@/components/ui/Input"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -6,22 +6,61 @@ import { Sparkles, Loader2 } from "lucide-react"
 
 const tiposContrato = ["Full Time", "Part Time", "Contrato", "Temporal", "Prácticas"]
 
+const rubrosLaborales = [
+  "Administración",
+  "Almacenamiento",
+  "Apoyo de Oficina",
+  "Banca | Servicios Financieros",
+  "Call Center",
+  "Compras",
+  "Finanzas | Contabilidad | Auditoría",
+  "Informática | Internet",
+  "Mantenimiento",
+  "Mercadeo | Ventas",
+  "Operaciones | Logística",
+  "Producción | Ingeniería | Calidad",
+  "Publicidad | Comunicaciones | Servicios",
+  "Puestos Profesionales",
+  "Recursos Humanos",
+  "Restaurantes",
+  "Salud",
+  "Telecomunicaciones",
+  "Varios",
+]
+
 export default function VacanteFormModal({ vacante = null, onClose, onSave }) {
   const isEditing = vacante !== null
 
-  const [titulo,      setTitulo]      = useState(vacante?.titulo      ?? "")
-  const [departamento, setDepartamento] = useState(vacante?.departamento ?? "")
-  const [ubicacion,   setUbicacion]   = useState(vacante?.ubicacion   ?? "")
-  const [contrato,    setContrato]    = useState(vacante?.tipoContrato ?? "")
-  const [descripcion, setDescripcion] = useState(vacante?.descripcion ?? "")
-  const [experiencia, setExperiencia] = useState(vacante?.experiencia ?? "")
-  const [requisitos,  setRequisitos]  = useState(vacante?.requisitos  ?? "")
-  const [salarioMin,  setSalarioMin]  = useState(vacante?.salarioMin  ?? "")
-  const [salarioMax,  setSalarioMax]  = useState(vacante?.salarioMax  ?? "")
+  const [titulo,        setTitulo]        = useState(vacante?.titulo       ?? "")
+  const [departamento,   setDepartamento]   = useState(vacante?.departamento  ?? "")
+  const [ubicacion,     setUbicacion]     = useState(vacante?.ubicacion    ?? "")
+  const [contrato,      setContrato]      = useState(vacante?.tipoContrato ?? "")
+  const [descripcion,   setDescripcion]   = useState(vacante?.descripcion  ?? "")
+  const [experiencia,   setExperiencia]   = useState(vacante?.experiencia  ?? "")
+  const [requisitos,    setRequisitos]    = useState(vacante?.requisitos   ?? "")
+  const [salarioMin,    setSalarioMin]    = useState(vacante?.salarioMin   ?? "")
+  const [salarioMax,    setSalarioMax]    = useState(vacante?.salarioMax   ?? "")
 
-  const [urlEmpresa,    setUrlEmpresa]    = useState("")
-  const [mostrarUrlIA,  setMostrarUrlIA]  = useState(false)
-  const [generandoIA,   setGenerandoIA]   = useState(false)
+  const [departments,  setDepartments]  = useState([])
+  const [urlEmpresa,   setUrlEmpresa]   = useState("")
+  const [mostrarUrlIA, setMostrarUrlIA] = useState(false)
+  const [generandoIA,  setGenerandoIA]  = useState(false)
+  const [errorIA,      setErrorIA]      = useState("")
+
+  const [guardando, setGuardando] = useState(false)
+  const [error,     setError]     = useState("")
+
+  const token = localStorage.getItem("applik_token")
+
+  useEffect(() => {
+    if (!token) return
+    fetch(`${import.meta.env.VITE_JOB_SERVICE_URL}/api/v1/jobs/departments`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.json())
+      .then(data => setDepartments(Array.isArray(data) ? data : []))
+      .catch(() => {})
+  }, [])
 
   const handleGenerarIA = async () => {
     if (!titulo.trim()) {
@@ -32,25 +71,75 @@ export default function VacanteFormModal({ vacante = null, onClose, onSave }) {
     if (!urlEmpresa.trim()) return
 
     setGenerandoIA(true)
+    setErrorIA("")
     try {
-      // TODO: conectar con AI Service — POST /api/v1/jobs/generate-description
-      // const res = await fetch(`${import.meta.env.VITE_AI_SERVICE_URL}/api/v1/jobs/generate-description`, {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      //   body: JSON.stringify({ jobTitle: titulo, companyUrl: urlEmpresa }),
-      // })
-      // const data = await res.json()
-      // setDescripcion(data.data)
-      await new Promise(r => setTimeout(r, 1500)) // placeholder hasta conectar
-      setDescripcion(`Descripción generada por IA para el puesto de ${titulo}. Conéctala al AI Service para obtener el contenido real.`)
+      const res = await fetch(`${import.meta.env.VITE_AI_SERVICE_URL}/api/v1/jobs/generate-description`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ jobTitle: titulo, companyUrl: urlEmpresa }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message ?? "Error al generar")
+      setDescripcion(data.data)
+    } catch (err) {
+      setErrorIA(err.message ?? "No se pudo generar la descripción. Intenta de nuevo.")
     } finally {
       setGenerandoIA(false)
     }
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    onSave?.({ titulo, departamento, ubicacion, contrato, descripcion, experiencia, requisitos, salarioMin, salarioMax })
+    setGuardando(true)
+    setError("")
+
+    let dept = departments.find(d => d.name === departamento)
+
+    // Si el departamento no existe en el tenant aún, se crea automáticamente
+    if (!dept) {
+      const createRes = await fetch(`${import.meta.env.VITE_JOB_SERVICE_URL}/api/v1/jobs/departments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ name: departamento }),
+      })
+      if (!createRes.ok) {
+        setError("No se pudo crear el departamento. Intenta de nuevo.")
+        setGuardando(false)
+        return
+      }
+      dept = await createRes.json()
+      setDepartments(prev => [...prev, dept])
+    }
+
+    const body = {
+      title:         titulo,
+      description:   descripcion,
+      requirements:  requisitos || undefined,
+      salary_min:    parseFloat(salarioMin) || 0,
+      salary_max:    parseFloat(salarioMax) || 0,
+      department_id: dept.id,
+    }
+
+    try {
+      const url = isEditing
+        ? `${import.meta.env.VITE_JOB_SERVICE_URL}/api/v1/jobs/${vacante.id}`
+        : `${import.meta.env.VITE_JOB_SERVICE_URL}/api/v1/jobs`
+      const method = isEditing ? "PATCH" : "POST"
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(body),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? data.message ?? "Error al guardar")
+
+      onSave?.(data)
+    } catch (err) {
+      setError(err.message ?? "No se pudo guardar la vacante. Intenta de nuevo.")
+    } finally {
+      setGuardando(false)
+    }
   }
 
   const handleDescartar = (e) => {
@@ -85,12 +174,24 @@ export default function VacanteFormModal({ vacante = null, onClose, onSave }) {
           />
 
           <div className="grid grid-cols-2 gap-4">
-            <Input
-              label="Departamento"
-              placeholder="Ej. Marketing"
-              value={departamento}
-              onChange={(e) => setDepartamento(e.target.value)}
-            />
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-slate-700">Departamento</label>
+              <select
+                value={departamento}
+                onChange={(e) => setDepartamento(e.target.value)}
+                required
+                className={cn(
+                  "w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800",
+                  "focus:border-violet-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-violet-400/20",
+                  "transition-colors"
+                )}
+              >
+                <option value="" disabled>Selecciona...</option>
+                {rubrosLaborales.map((r) => (
+                  <option key={r} value={r}>{r}</option>
+                ))}
+              </select>
+            </div>
             <Input
               label="Ubicación"
               placeholder="Ej. Managua"
@@ -134,7 +235,6 @@ export default function VacanteFormModal({ vacante = null, onClose, onSave }) {
               </button>
             </div>
 
-            {/* Campo URL empresa — aparece al hacer clic en Generar con IA */}
             {mostrarUrlIA && (
               <div className="flex gap-2">
                 <input
@@ -154,6 +254,7 @@ export default function VacanteFormModal({ vacante = null, onClose, onSave }) {
                 </button>
               </div>
             )}
+            {errorIA && <p className="text-xs text-red-500">{errorIA}</p>}
 
             <Textarea
               placeholder="Describe las responsabilidades y objetivos del puesto..."
@@ -184,29 +285,38 @@ export default function VacanteFormModal({ vacante = null, onClose, onSave }) {
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium text-slate-700">
               Rango Salarial
-              <span className="ml-1 text-xs text-slate-400">(opcional)</span>
+              <span className="ml-1 text-xs text-slate-400">(NIO)</span>
             </label>
             <div className="grid grid-cols-2 gap-4">
               <Input
-                placeholder="Mínimo (USD)"
+                placeholder="Mínimo"
+                type="number"
+                min="0"
                 value={salarioMin}
                 onChange={(e) => setSalarioMin(e.target.value)}
               />
               <Input
-                placeholder="Máximo (USD)"
+                placeholder="Máximo"
+                type="number"
+                min="0"
                 value={salarioMax}
                 onChange={(e) => setSalarioMax(e.target.value)}
               />
             </div>
           </div>
 
+          {error && <p className="text-xs text-red-500 text-center">{error}</p>}
+
           {/* Actions */}
           <div className="flex justify-end gap-3 pt-2">
             <Button type="button" variant="outline" onClick={handleDescartar}>
               Cancelar
             </Button>
-            <Button type="submit" variant="primary">
-              {isEditing ? "Guardar Cambios" : "Guardar Vacante"}
+            <Button type="submit" variant="primary" disabled={guardando}>
+              {guardando
+                ? <><Loader2 className="size-3.5 animate-spin mr-1" /> Guardando...</>
+                : isEditing ? "Guardar Cambios" : "Guardar Vacante"
+              }
             </Button>
           </div>
 

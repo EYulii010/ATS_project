@@ -1,14 +1,21 @@
 import { useState, useEffect, useRef } from "react"
 import { createPortal } from "react-dom"
 import { useNavigate } from "react-router-dom"
-import { Search, MapPin, Layers, Clock, ChevronLeft, ChevronRight, Building2, ChevronDown } from "lucide-react"
+import { Search, MapPin, Layers, Clock, ChevronLeft, ChevronRight, Building2, ChevronDown, X } from "lucide-react"
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
 
 const coincidencias = [
-  { id: 1, titulo: "Especialista Digital",  empresa: "Flor de Caña", ubicacion: "Managua" },
-  { id: 2, titulo: "Community Manager",     empresa: "Tigo",         ubicacion: "Managua" },
-  { id: 3, titulo: "Content Creator",       empresa: "Flor de Caña", ubicacion: "Managua" },
+  { id: 1,  titulo: "Especialista Digital",   empresa: "Flor de Caña", ubicacion: "Managua", tipo: "Full-Time"  },
+  { id: 2,  titulo: "Community Manager",      empresa: "Tigo",         ubicacion: "Managua", tipo: "Remoto"     },
+  { id: 3,  titulo: "Content Creator",        empresa: "Flor de Caña", ubicacion: "Managua", tipo: "Part-Time"  },
+  { id: 4,  titulo: "Diseñador UX",           empresa: "Stripe",       ubicacion: "Remoto",  tipo: "Full-Time"  },
+  { id: 5,  titulo: "Analista de Mercado",    empresa: "Managua Co.",  ubicacion: "Managua", tipo: "Full-Time"  },
+  { id: 6,  titulo: "Ingeniero en Software",  empresa: "Claro",        ubicacion: "Managua", tipo: "Full-Time"  },
+  { id: 7,  titulo: "Product Manager",        empresa: "Tigo",         ubicacion: "Managua", tipo: "Híbrido"    },
+  { id: 8,  titulo: "Analista Financiero",    empresa: "BAC",          ubicacion: "Managua", tipo: "Full-Time"  },
+  { id: 9,  titulo: "Gerente de Proyectos",   empresa: "Ogilvy",       ubicacion: "Managua", tipo: "Full-Time"  },
+  { id: 10, titulo: "Diseñador Gráfico",      empresa: "Pepsi",        ubicacion: "Managua", tipo: "Part-Time"  },
 ]
 
 const ultimasOfertas = [
@@ -84,7 +91,10 @@ function AnimatedDropdown({ icon: Icon, placeholder, options }) {
         <span className={`flex-1 text-left text-sm ${valor ? "text-violet-600 font-medium" : "text-slate-400"}`}>
           {valor || placeholder}
         </span>
-        <ChevronDown className={`size-4 text-slate-300 transition-transform duration-200 ${abierto ? "rotate-180" : ""}`} />
+        {valor
+          ? <X className="size-4 text-slate-300 hover:text-slate-500" onClick={(e) => { e.stopPropagation(); setValor(""); setAbierto(false) }} />
+          : <ChevronDown className={`size-4 text-slate-300 transition-transform duration-200 ${abierto ? "rotate-180" : ""}`} />
+        }
       </button>
 
       {abierto && createPortal(
@@ -96,13 +106,14 @@ function AnimatedDropdown({ icon: Icon, placeholder, options }) {
           {options.map((o, i) => (
             <button
               key={o}
-              onClick={() => { setValor(o); setAbierto(false) }}
-              className={`flex w-full items-center px-4 py-2.5 text-sm transition-colors animate-fadeItem ${
+              onClick={() => { setValor(valor === o ? "" : o); setAbierto(false) }}
+              className={`flex w-full items-center justify-between px-4 py-2.5 text-sm transition-colors animate-fadeItem ${
                 valor === o ? "bg-violet-50 text-violet-700 font-semibold" : "text-slate-600 hover:bg-slate-50"
               }`}
               style={{ animationDelay: `${i * 40}ms` }}
             >
-              {o}
+              <span>{o}</span>
+              {valor === o && <X className="size-3.5 text-violet-400" />}
             </button>
           ))}
         </div>,
@@ -192,39 +203,40 @@ export default function InicioPage() {
         </div>
       </section>
 
-      {/* ── Coincidencias con tu perfil ── */}
-      <section>
-        <h2 className="mb-4 text-lg font-bold text-slate-800">Coincidencias con tu perfil</h2>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {/* ── Coincidencias ── */}
+      <section>
+        <h2 className="text-lg font-bold text-slate-800">Vacantes recomendadas</h2>
+        <p className="mb-4 text-sm text-slate-400">Basadas en las habilidades y experiencia de tu CV</p>
+
+        <div className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1">
           {coincidencias.map((job) => (
             <div
               key={job.id}
-              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-violet-200"
+              className="shrink-0 w-56 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-violet-200 flex flex-col"
             >
-              <span className="inline-block rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-600">
-                ✓ Alta coincidencia
-              </span>
-              <h3 className="mt-3 font-semibold text-slate-800">{job.titulo}</h3>
-              <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-400">
-                <Building2 className="size-3.5 shrink-0" /> {job.empresa}
-              </div>
-              <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-400">
-                <MapPin className="size-3.5 shrink-0" /> {job.ubicacion}
+              <div className="flex items-center gap-3 mb-3 flex-1">
+                <EmpresaAvatar nombre={job.empresa} />
+                <div>
+                  <h3 className="font-semibold text-slate-800 text-sm leading-tight">{job.titulo}</h3>
+                  <div className="flex items-center gap-1 text-xs text-slate-400 mt-0.5">
+                    <Building2 className="size-3" /> {job.empresa}
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-slate-400">
+                    <MapPin className="size-3" /> {job.ubicacion}
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-slate-400">
+                    <Clock className="size-3" /> {job.tipo}
+                  </div>
+                </div>
               </div>
               <button
                 onClick={() => navigate(`/trabajo/${job.id}`)}
-                className="mt-4 w-full rounded-xl bg-violet-600 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-violet-700 hover:shadow-lg hover:shadow-violet-200 hover:-translate-y-0.5 active:scale-[0.98]"
+                className="w-full rounded-xl bg-violet-600 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-violet-700 hover:shadow-lg hover:shadow-violet-200 hover:-translate-y-0.5 active:scale-[0.98] mt-auto"
               >
-                Ver puesto
+                Ver detalles
               </button>
             </div>
-          ))}
-        </div>
-
-        <div className="mt-4 flex justify-center gap-1.5">
-          {coincidencias.map((_, i) => (
-            <div key={i} className={`size-1.5 rounded-full transition-all duration-300 ${i === 0 ? "bg-violet-600 w-4" : "bg-slate-300"}`} />
           ))}
         </div>
       </section>

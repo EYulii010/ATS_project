@@ -1,5 +1,6 @@
 import React from 'react';
-import Logo from '@/components/ui/Logo';// Adjust path if needed
+import { Link } from 'react-router-dom';
+import Logo from '@/components/ui/Logo';
 
 const Footer = () => {
     return (
@@ -18,9 +19,9 @@ const Footer = () => {
 
                 {/* Simple Links */}
                 <div className="flex gap-6 text-sm font-medium text-slate-500">
-                    <a href="#" className="hover:text-purple-light transition-colors">Privacidad</a>
-                    <a href="#" className="hover:text-purple-light transition-colors">Términos</a>
-                    <a href="#" className="hover:text-purple-light transition-colors">Contacto</a>
+                    <Link to="/privacidad" className="hover:text-violet-600 transition-colors">Privacidad</Link>
+                    <Link to="/terminos"   className="hover:text-violet-600 transition-colors">Términos</Link>
+                    <Link to="/contacto"   className="hover:text-violet-600 transition-colors">Contacto</Link>
                 </div>
             </div>
         </footer>

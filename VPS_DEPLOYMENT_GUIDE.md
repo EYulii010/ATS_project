@@ -60,13 +60,13 @@ Abre `docker-compose.prod.yml` y edita la línea del email de Traefik para Let's
 Ejecuta el siguiente comando para levantar tu SaaS al aire libre:
 
 ```bash
-docker-compose -f docker-compose.prod.yml up --build -d
+docker compose -f docker-compose.prod.yml up --build -d
 ```
 
 **Verificar Salud:**
 Revisa que el *Proxy* capturó los dominios y está emitiendo SSL:
 ```bash
-docker-compose -f docker-compose.prod.yml logs -f reverse-proxy
+docker compose -f docker-compose.prod.yml logs -f reverse-proxy
 ```
 
 ¡Listo! A partir de aquí tus candidatos y reclutadores interactuarán bajo `https://api.tu-ats.com`.

@@ -11,8 +11,11 @@ async function authRoutes(fastify, options) {
 
   // Registrar organización, crea el tenant y un admin user en una sola tranacción
   fastify.post('/organizations/register', authController.handleRegisterOrganization);
+
+  // Recuperación de contraseña
+  fastify.post('/forgot-password', authController.handleForgotPassword);
+  fastify.post('/reset-password', authController.handleResetPassword);
   
-  // fastify.get('/tenants/:id', authController.getTenantById);
 
   // Ruta protegida para invitar nuevo usuario reclutador
   fastify.post('/invitations/create', {

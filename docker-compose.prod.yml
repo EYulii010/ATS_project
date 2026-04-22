@@ -1,22 +1,22 @@
 services:
   reverse-proxy:
-    image: traefik:v2.10
+    image: traefik:v3.1
     container_name: ats_proxy
     command:
       - "--api.insecure=false"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
+      - "--providers.file.filename=/etc/traefik/dynamic.yml"
+      - "--providers.file.watch=true"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
-      # - "--certificatesresolvers.myresolver.acme.email=tu-correo@empresa.com"
+      - "--certificatesresolvers.myresolver.acme.email=cristes25@gmail.com"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "./letsencrypt:/letsencrypt"
+      - "./traefik-dynamic.yml:/etc/traefik/dynamic.yml:ro"
     restart: unless-stopped
     networks:
       - ats_network
@@ -28,9 +28,10 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.auth.rule=Host(`api.tu-dominio.com`) && PathPrefix(`/api/v1/auth`)"
+      - "traefik.http.routers.auth.rule=Host(`api.applik-ni.com`) && PathPrefix(`/api/v1/auth`)"
       - "traefik.http.routers.auth.entrypoints=websecure"
       - "traefik.http.routers.auth.tls.certresolver=myresolver"
+      - "traefik.http.services.auth.loadbalancer.server.port=3001"
     networks:
       - ats_network
 
@@ -41,9 +42,10 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.job.rule=Host(`api.tu-dominio.com`) && PathPrefix(`/api/v1/jobs`)"
+      - "traefik.http.routers.job.rule=Host(`api.applik-ni.com`) && PathPrefix(`/api/v1/jobs`)"
       - "traefik.http.routers.job.entrypoints=websecure"
       - "traefik.http.routers.job.tls.certresolver=myresolver"
+      - "traefik.http.services.job.loadbalancer.server.port=3003"
     networks:
       - ats_network
 
@@ -54,9 +56,10 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.talent.rule=Host(`api.tu-dominio.com`) && PathPrefix(`/api/v1/talents`)"
+      - "traefik.http.routers.talent.rule=Host(`api.applik-ni.com`) && PathPrefix(`/api/v1/talents`)"
       - "traefik.http.routers.talent.entrypoints=websecure"
       - "traefik.http.routers.talent.tls.certresolver=myresolver"
+      - "traefik.http.services.talent.loadbalancer.server.port=3002"
     networks:
       - ats_network
 
@@ -65,7 +68,19 @@ services:
     container_name: applik_ai_prod
     env_file: .env
     restart: unless-stopped
-    # Nota: Usualmente el AI Service NO se expone a internet, solo la red interna
+    networks:
+      - ats_network
+
+  postgres:
+    image: ankane/pgvector:v0.5.0
+    container_name: ats_postgres_prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: adminpassword
+      POSTGRES_DB: talent_platform_prod
+    volumes:
+      - ./postgres_data_prod:/var/lib/postgresql/data
     networks:
       - ats_network
 

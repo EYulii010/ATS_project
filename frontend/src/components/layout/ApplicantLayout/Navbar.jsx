@@ -72,7 +72,7 @@ const Navbar = () => {
                         <div className={`hidden md:flex items-center gap-2 md:gap-4 font-bold transition-all duration-300 ${
                             searchOpen ? "opacity-0 pointer-events-none w-0 overflow-hidden" : "opacity-100"
                         }`}>
-                            <NavLink to="/"             className={navLinkClass}>Inicio</NavLink>
+                            <NavLink to="/inicio"             className={navLinkClass}>Inicio</NavLink>
                             <NavLink to="/trabajos"     className={navLinkClass}>Trabajos</NavLink>
                             <NavLink to="/aplicaciones" className={navLinkClass}>Mi Actividad</NavLink>
                         </div>
@@ -146,7 +146,7 @@ const Navbar = () => {
             {/* ── Menú mobile desplegable ── */}
             {mobileMenuOpen && (
                 <div className="md:hidden w-full bg-white border-b border-slate-200 shadow-lg px-4 py-3 space-y-1">
-                    <NavLink to="/"             className={mobileNavLinkClass} onClick={() => setMobileMenuOpen(false)}>Inicio</NavLink>
+                    <NavLink to="/inicio"             className={mobileNavLinkClass} onClick={() => setMobileMenuOpen(false)}>Inicio</NavLink>
                     <NavLink to="/trabajos"     className={mobileNavLinkClass} onClick={() => setMobileMenuOpen(false)}>Trabajos</NavLink>
                     <NavLink to="/aplicaciones" className={mobileNavLinkClass} onClick={() => setMobileMenuOpen(false)}>Mi Actividad</NavLink>
                     {/* Iniciar Sesión — solo cuando no hay usuario */}

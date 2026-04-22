@@ -15,7 +15,7 @@ const fastify = require('fastify')({
 
 // PLUGINS
 fastify.register(require('@fastify/cors'), {
-  origin: ['http://localhost:5173', 'https://applik-ni.com', 'https://www.applik-ni.com']
+  origin: ['http://localhost:5173', 'https://applik-ni.com', 'https://www.applik-ni.com', 'https://app.applik-ni.com']
 });
 
 fastify.register(require('@fastify/jwt'), {

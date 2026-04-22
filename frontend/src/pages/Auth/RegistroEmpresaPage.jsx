@@ -4,6 +4,7 @@ import { Eye, EyeOff, Building2, Mail, Lock, User, Hash, CheckCircle2 } from "lu
 import Logo from "@/components/ui/Logo";
 import { useAuth } from "@/context/AuthContext";
 import { registerOrganization } from "@/api/auth";
+import Ley787Modal from "@/components/ui/Ley787Modal";
 
 const RegistroEmpresaPage = () => {
     const [empresa,        setEmpresa]        = useState("");
@@ -14,6 +15,7 @@ const RegistroEmpresaPage = () => {
     const [password,       setPassword]       = useState("");
     const [confirmar,      setConfirmar]      = useState("");
     const [law787,         setLaw787]         = useState(false);
+    const [modalLey,       setModalLey]       = useState(false);
     const [showPassword,   setShowPassword]   = useState(false);
     const [showConfirmar,  setShowConfirmar]  = useState(false);
     const [error,          setError]          = useState("");
@@ -189,13 +191,22 @@ const RegistroEmpresaPage = () => {
 
                         {/* Ley 787 */}
                         <label className="flex items-start gap-2.5 cursor-pointer">
-                            <input type="checkbox" checked={law787} onChange={(e) => { setLaw787(e.target.checked); setError("") }}
-                                className="mt-0.5 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-400 shrink-0" />
+                            <input type="checkbox" checked={law787} readOnly
+                                className="mt-0.5 w-4 h-4 rounded border-slate-300 text-violet-600 focus:ring-violet-400 shrink-0 cursor-pointer" />
                             <span className="text-xs text-slate-500 leading-relaxed">
-                                Acepto el tratamiento de datos personales conforme a la{" "}
-                                <span className="font-medium text-slate-700">Ley 787 de Protección de Datos Personales</span> de Nicaragua.
+                                He leído y acepto el tratamiento de datos personales conforme a la{" "}
+                                <button type="button" onClick={() => setModalLey(true)}
+                                    className="font-medium text-violet-600 hover:text-violet-700 underline underline-offset-2 transition-colors">
+                                    Ley 787 de Protección de Datos Personales
+                                </button>{" "}de Nicaragua.
                             </span>
                         </label>
+                        {modalLey && (
+                            <Ley787Modal
+                                onAceptar={() => { setLaw787(true); setModalLey(false); setError("") }}
+                                onCerrar={() => setModalLey(false)}
+                            />
+                        )}
 
                         {error && <p className="text-xs text-red-500">{error}</p>}
 
@@ -207,7 +218,11 @@ const RegistroEmpresaPage = () => {
 
                     <p className="text-center text-sm text-slate-500 mt-6">
                         ¿Ya tienes cuenta?{" "}
-                        <Link to="/login" className="text-blue-600 hover:text-blue-700 font-medium">Iniciar sesión</Link>
+                        <Link to="/login" className="text-violet-600 hover:text-violet-700 font-medium">Iniciar sesión</Link>
+                    </p>
+                    <p className="text-center text-sm text-slate-500 mt-2">
+                        ¿Eres candidato?{" "}
+                        <Link to="/registro" className="text-violet-600 hover:text-violet-700 font-medium">Regístrate aquí</Link>
                     </p>
                 </div>
             </div>

@@ -1,10 +1,12 @@
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const dotenv = require('dotenv').config();
 // Agregamos Session a los modelos importados
-const { Employee, Candidate, Tenant, Session, sequelize } = require('../models');
+const { Employee, Candidate, Tenant, Session, PasswordResetToken, sequelize } = require('../models');
 const { verifyPassword, validatePasswordStrength } = require('../utils/passwordUtils');
 const { validateNicaraguanRUC } = require('../utils/validationUtils');
 const { checkIfUserExists } = require('../utils/userUtils');
+const { sendPasswordResetEmail } = require('../utils/emailService');
 
 // Se necesitan middleware para validación de inputs.
 
@@ -325,3 +327,75 @@ exports.handleLogout = async (request, reply) => {
     })
   }
 }
+
+// ─── RECUPERACIÓN DE CONTRASEÑA ───────────────────────────────────────────────
+
+exports.handleForgotPassword = async (request, reply) => {
+  const { email } = request.body;
+
+  try {
+    const employee = await Employee.findOne({ where: { email } });
+    if (!employee) {
+      // Por seguridad respondemos 200 para no revelar si el email existe o no
+      return reply.code(200).send({ message: 'Si ese correo está registrado, recibirás un enlace.' });
+    }
+
+    // Invalida tokens anteriores no usados del mismo usuario
+    await PasswordResetToken.update(
+      { used: true },
+      { where: { employee_id: employee.id, used: false } }
+    );
+
+    // Genera token seguro de 32 bytes = 64 caracteres hex
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 min
+
+    await PasswordResetToken.create({
+      token: rawToken,
+      employee_id: employee.id,
+      expires_at: expiresAt,
+    });
+
+    await sendPasswordResetEmail(email, rawToken);
+
+    return reply.code(200).send({ message: 'Si ese correo está registrado, recibirás un enlace.' });
+  } catch (error) {
+    request.log.error(error);
+    return reply.code(500).send({ success: false, message: 'Error interno al procesar la solicitud.' });
+  }
+};
+
+exports.handleResetPassword = async (request, reply) => {
+  const { token, newPassword } = request.body;
+  const pepper = process.env.AUTH_DB_PEPPER;
+
+  try {
+    const resetRecord = await PasswordResetToken.findOne({ where: { token, used: false } });
+
+    if (!resetRecord) {
+      return reply.code(400).send({ error: 'Token inválido o ya utilizado.' });
+    }
+
+    if (new Date() > resetRecord.expires_at) {
+      await resetRecord.update({ used: true });
+      return reply.code(400).send({ error: 'Token expirado. Solicita uno nuevo.' });
+    }
+
+    const employee = await Employee.findByPk(resetRecord.employee_id);
+    if (!employee) {
+      return reply.code(404).send({ error: 'Usuario no encontrado.' });
+    }
+
+    // El hook beforeSave de Employee se encarga del hash + pepper automáticamente
+    employee.password = newPassword + pepper;
+    await employee.save();
+
+    // Invalida el token usado
+    await resetRecord.update({ used: true });
+
+    return reply.code(200).send({ message: 'Contraseña actualizada exitosamente.' });
+  } catch (error) {
+    request.log.error(error);
+    return reply.code(500).send({ success: false, message: 'Error interno al restablecer la contraseña.' });
+  }
+};

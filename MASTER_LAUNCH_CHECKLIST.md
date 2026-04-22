@@ -10,11 +10,11 @@ Este documento es tu lista de verificación personal. Marca cada casilla (cambia
 - [ ] Sube todo a la nube con `git push origin main`.
 
 ## Fase 2: Compras e Infraestructura Externa
-- [ ] **Comprar Dominio:** Adquiere tu dominio (Ej: `tu-ats.com`) en tu proveedor favorito (GoDaddy, Namecheap, Google Domains).
+- [x] **Comprar Dominio:** Adquiere tu dominio (Ej: `tu-ats.com`) y regístralo/vinculalo a **Cloudflare**.
 - [ ] **Comprar Servidor (VPS):** Entra a DigitalOcean, AWS o Contabo y alquila un VPS basado en **Ubuntu 24.04** (Mínimo 2GB de RAM).
 - [ ] **Anotar IP Pública:** Cuando el VPS esté creado, copia la "IP Address" pública que te da el proveedor.
-- [ ] **Configurar DNS Backend:** En tu proveedor de dominio, crea un registro DNS de tipo `A`, llamado `api`, y pégale la IP pública de tu VPS.
-- [ ] **Configurar DNS Frontend (Opcional por ahora):** Crea un registro secundario llamado `app` apuntando vacío por ahora, o espérate a Vercel.
+- [ ] **Configurar DNS Backend (CLOUDFLARE):** En Cloudflare, crea un registro DNS de tipo `A`, llamado `api`, y pégale la IP de tu VPS. **¡IMPORTANTE!** Apaga el "Proxy status" ("Nube Naranja" a "Nube Gris" / DNS Only) para que Traefik pueda emitir SSL.
+- [ ] **Configurar DNS Frontend (Opcional por ahora):** Crea un registro secundario llamado `app` (o espérate a Vercel).
 
 ## Fase 3: Aprovisionar el "Backend Server"
 *(Sigue las instrucciones técnicas exactas de `VPS_DEPLOYMENT_GUIDE.md` a la par de esto)*
@@ -25,7 +25,7 @@ Este documento es tu lista de verificación personal. Marca cada casilla (cambia
 - [ ] Clona tu reporsitorio desde GitHub en el VPS.
 - [ ] Crea tu archivo `.env` utilizando de molde el `.env.prod.example`. Inyecta todos tus secretos finales.
 - [ ] Ajusta el email de Traefik para SSL en `docker-compose.prod.yml`.
-- [ ] Corre el comando atómico: `docker-compose -f docker-compose.prod.yml up --build -d`.
+- [ ] Corre el comando atómico: `docker compose -f docker-compose.prod.yml up --build -d`.
 - [ ] Espera un minuto y abre tu navegador en `https://api.tu-ats.com/api/v1/talents/estado`. Deberás ver el candadito verde de SSL (HTTPS).
 
 ## Fase 4: Frontend al Estrellato

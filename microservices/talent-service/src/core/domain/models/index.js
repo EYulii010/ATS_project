@@ -5,6 +5,7 @@ const Education = require('./Education');
 const Skill = require('./Skill');
 const CandidateSkill = require('./CandidateSkill');
 const Application = require('./Application');
+const ApplicationStageHistory = require('./ApplicationStageHistory');
 
 // Define Relationships (1-N)
 CandidateProfile.hasMany(WorkExperience, { foreignKey: 'profile_id', as: 'work_experiences' });
@@ -22,6 +23,10 @@ CandidateSkill.belongsTo(CandidateProfile, { foreignKey: 'profile_id' });
 Skill.hasMany(CandidateSkill, { foreignKey: 'skill_id', as: 'candidate_associations' });
 CandidateSkill.belongsTo(Skill, { foreignKey: 'skill_id', as: 'skill_details' });
 
+// Application Stage History
+Application.hasMany(ApplicationStageHistory, { foreignKey: 'application_id', as: 'stage_history', onDelete: 'CASCADE' });
+ApplicationStageHistory.belongsTo(Application, { foreignKey: 'application_id' });
+
 module.exports = {
     sequelize,
     CandidateProfile,
@@ -29,5 +34,6 @@ module.exports = {
     Education,
     Skill,
     CandidateSkill,
-    Application
+    Application,
+    ApplicationStageHistory
 };

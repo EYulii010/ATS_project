@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { createPortal } from "react-dom"
 import { Filter } from "lucide-react"
 import { Avatar } from "@/components/ui/Avatar"
@@ -13,85 +13,105 @@ import EnviarCorreoModal from "./EnviarCorreoModal"
 import DetallesCandidatoPage from "./DetallesCandidatoPage"
 
 const filtrosOpciones = {
-  vacantes:    ["Gerente de Ventas", "Marketing Specialist", "Contador Senior", "Desarrollador Web"],
+  vacantes:    ["Gerente de Ventas", "Gerente de Operaciones", "Desarrollador Frontend", "Contador Senior"],
   area:        ["Gerencia", "Marketing", "Finanzas", "Operaciones", "IT"],
   reclutador:  ["Cristiana Espinoza", "Martha Torres", "Felix Urrutia"],
 }
 
-function FiltrosPanel({ filtros, onChange, onLimpiar }) {
-  const [abierto, setAbierto] = useState(null) // "vacantes" | "area" | "reclutador" | null
-  const panelRef = useRef(null)
+function FiltroBtn({ tipo, opciones, seleccionados, onChange }) {
+  const [abierto, setAbierto] = useState(false)
+  const [pos, setPos]         = useState({ top: 0, left: 0 })
+  const btnRef      = useRef(null)
+  const dropdownRef = useRef(null)
+  const label = tipo.charAt(0).toUpperCase() + tipo.slice(1)
 
   useEffect(() => {
     const handler = (e) => {
-      if (panelRef.current && !panelRef.current.contains(e.target)) {
-        setAbierto(null)
-      }
+      if (
+        btnRef.current      && !btnRef.current.contains(e.target) &&
+        dropdownRef.current && !dropdownRef.current.contains(e.target)
+      ) setAbierto(false)
     }
     document.addEventListener("mousedown", handler)
     return () => document.removeEventListener("mousedown", handler)
   }, [])
 
-  const toggleOpcion = (tipo, opcion) => {
-    const actuales = filtros[tipo]
-    const nuevos = actuales.includes(opcion)
-      ? actuales.filter((o) => o !== opcion)
-      : [...actuales, opcion]
-    onChange(tipo, nuevos)
+  const handleToggle = () => {
+    if (!abierto && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect()
+      setPos({ top: rect.bottom + 4, left: rect.left })
+    }
+    setAbierto((v) => !v)
+  }
+
+  const toggleOpcion = (opcion) => {
+    const nuevos = seleccionados.includes(opcion)
+      ? seleccionados.filter((o) => o !== opcion)
+      : [...seleccionados, opcion]
+    onChange(nuevos)
   }
 
   return (
-    <div ref={panelRef} className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-      {Object.entries(filtrosOpciones).map(([tipo, opciones]) => {
-        const seleccionados = filtros[tipo]
-        const label = tipo.charAt(0).toUpperCase() + tipo.slice(1)
-        const isOpen = abierto === tipo
+    <>
+      <button
+        ref={btnRef}
+        onClick={handleToggle}
+        className={`flex items-center gap-2 rounded-xl border px-4 py-2 text-sm transition-all whitespace-nowrap ${
+          seleccionados.length > 0
+            ? "border-blue-dark bg-blue-dark/5 text-blue-dark"
+            : "border-slate-200 bg-white text-slate-500 hover:border-slate-300"
+        }`}
+      >
+        <Filter className="size-3.5" />
+        {label}
+        {seleccionados.length > 0 && (
+          <span className="rounded-full bg-blue-dark text-white text-xs px-1.5 py-0.5">
+            {seleccionados.length}
+          </span>
+        )}
+      </button>
 
-        return (
-          <div key={tipo} className="relative shrink-0">
+      {abierto && createPortal(
+        <div
+          ref={dropdownRef}
+          className="fixed z-50 min-w-44 rounded-xl border border-slate-100 bg-white py-1 shadow-lg"
+          style={{ top: pos.top, left: pos.left }}
+        >
+          {opciones.map((opcion) => (
             <button
-              onClick={() => setAbierto(isOpen ? null : tipo)}
-              className={`flex items-center gap-2 rounded-xl border px-4 py-2 text-sm transition-all whitespace-nowrap ${
-                seleccionados.length > 0
-                  ? "border-blue-dark bg-blue-dark/5 text-blue-dark"
-                  : "border-slate-200 bg-white text-slate-500 hover:border-slate-300"
+              key={opcion}
+              onClick={() => toggleOpcion(opcion)}
+              className={`flex w-full items-center gap-2 px-4 py-2 text-sm transition-colors ${
+                seleccionados.includes(opcion) ? "text-blue-dark bg-blue-dark/5" : "text-slate-700 hover:bg-slate-50"
               }`}
             >
-              <Filter className="size-3.5" />
-              {label}
-              {seleccionados.length > 0 && (
-                <span className="rounded-full bg-blue-dark text-white text-xs px-1.5 py-0.5">
-                  {seleccionados.length}
-                </span>
-              )}
+              <span className={`size-3.5 rounded border flex items-center justify-center shrink-0 ${
+                seleccionados.includes(opcion) ? "border-blue-dark bg-blue-dark" : "border-slate-300"
+              }`}>
+                {seleccionados.includes(opcion) && <span className="text-white text-xs leading-none">✓</span>}
+              </span>
+              {opcion}
             </button>
+          ))}
+        </div>,
+        document.body
+      )}
+    </>
+  )
+}
 
-            {isOpen && (
-              <div className="absolute left-0 top-full mt-1 z-20 min-w-44 rounded-xl border border-slate-100 bg-white py-1 shadow-lg">
-                {opciones.map((opcion) => (
-                  <button
-                    key={opcion}
-                    onClick={() => toggleOpcion(tipo, opcion)}
-                    className={`flex w-full items-center gap-2 px-4 py-2 text-sm transition-colors ${
-                      seleccionados.includes(opcion)
-                        ? "text-blue-dark bg-blue-dark/5"
-                        : "text-slate-700 hover:bg-slate-50"
-                    }`}
-                  >
-                    <span className={`size-3.5 rounded border flex items-center justify-center shrink-0 ${
-                      seleccionados.includes(opcion) ? "border-blue-dark bg-blue-dark" : "border-slate-300"
-                    }`}>
-                      {seleccionados.includes(opcion) && <span className="text-white text-xs leading-none">✓</span>}
-                    </span>
-                    {opcion}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )
-      })}
-
+function FiltrosPanel({ filtros, onChange, onLimpiar }) {
+  return (
+    <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+      {Object.entries(filtrosOpciones).map(([tipo, opciones]) => (
+        <FiltroBtn
+          key={tipo}
+          tipo={tipo}
+          opciones={opciones}
+          seleccionados={filtros[tipo]}
+          onChange={(vals) => onChange(tipo, vals)}
+        />
+      ))}
       {Object.values(filtros).some((f) => f.length > 0) && (
         <button onClick={onLimpiar} className="text-xs text-slate-400 hover:text-slate-600 shrink-0 whitespace-nowrap">
           Limpiar filtros
@@ -102,10 +122,10 @@ function FiltrosPanel({ filtros, onChange, onLimpiar }) {
 }
 
 const candidatosData = [
-  { id: 1, nombre: "Osvaldo Rodriguez", email: "o.rodriguez@gmail.com", posicion: "Gerente de Ventas",      ciudad: "Managua", score: 94, etapa: "Recibido"        },
-  { id: 2, nombre: "Endy Gonzalez",     email: "e.gonzalez@gmail.com",  posicion: "Gerente de Operaciones", ciudad: "León",    score: 86, etapa: "Analizado"       },
-  { id: 3, nombre: "Martha Torres",     email: "m.torres@gmail.com",    posicion: "Desarrollador Frontend", ciudad: "Granada", score: 89, etapa: "Seleccionado"    },
-  { id: 4, nombre: "David Espinoza",    email: "d.espinoza@gmail.com",  posicion: "Contador Senior",        ciudad: "Managua", score: 80, etapa: "Bajo Entrevista" },
+  { id: 1, nombre: "Osvaldo Rodriguez", email: "o.rodriguez@gmail.com", posicion: "Gerente de Ventas",      ciudad: "Managua", score: 94, etapa: "Recibido",        area: "Gerencia",    reclutador: "Cristiana Espinoza" },
+  { id: 2, nombre: "Endy Gonzalez",     email: "e.gonzalez@gmail.com",  posicion: "Gerente de Operaciones", ciudad: "León",    score: 86, etapa: "Analizado",       area: "Operaciones", reclutador: "Felix Urrutia"      },
+  { id: 3, nombre: "Martha Torres",     email: "m.torres@gmail.com",    posicion: "Desarrollador Frontend", ciudad: "Granada", score: 89, etapa: "Seleccionado",    area: "IT",          reclutador: "Martha Torres"      },
+  { id: 4, nombre: "David Espinoza",    email: "d.espinoza@gmail.com",  posicion: "Contador Senior",        ciudad: "Managua", score: 80, etapa: "Bajo Entrevista", area: "Finanzas",    reclutador: "Cristiana Espinoza" },
 ]
 
 function MatchScoreBar({ score }) {
@@ -175,9 +195,9 @@ export default function CandidatosPage() {
       c.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
       c.email.toLowerCase().includes(busqueda.toLowerCase()) ||
       c.posicion.toLowerCase().includes(busqueda.toLowerCase())
-    const matchVacantes   = filtros.vacantes.length  === 0 || filtros.vacantes.includes(c.posicion)
-    const matchArea       = filtros.area.length      === 0 // área no está en mock data — siempre pasa
-    const matchReclutador = filtros.reclutador.length === 0 // reclutador no está en mock data — siempre pasa
+    const matchVacantes   = filtros.vacantes.length   === 0 || filtros.vacantes.includes(c.posicion)
+    const matchArea       = filtros.area.length       === 0 || filtros.area.includes(c.area)
+    const matchReclutador = filtros.reclutador.length === 0 || filtros.reclutador.includes(c.reclutador)
     return matchBusqueda && matchVacantes && matchArea && matchReclutador
   })
 
@@ -189,7 +209,22 @@ export default function CandidatosPage() {
   const abrirCorreo       = (c) => { setCandidato(c); setModal("correo") }
   const cerrarModal     = () => setModal(null)
 
-  const confirmarEtapa = (nuevaEtapa) => {
+  const confirmarEtapa = async (nuevaEtapa) => {
+    if (candidatoActivo.application_id) {
+      try {
+        await fetch(
+          `${import.meta.env.VITE_TALENT_SERVICE_URL}/api/v1/talents/applications/${candidatoActivo.application_id}/stage`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            body: JSON.stringify({ stage: nuevaEtapa }),
+          }
+        )
+      } catch { /* falla silencioso — UI se actualiza igual */ }
+    }
     setCandidatos((prev) =>
       prev.map((c) => c.id === candidatoActivo.id ? { ...c, etapa: nuevaEtapa } : c)
     )
