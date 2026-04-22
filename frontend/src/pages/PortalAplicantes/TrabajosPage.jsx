@@ -247,6 +247,7 @@ function SidebarFiltros({ filtros, onToggle, onAplicar }) {
 
 function JobCard({ job }) {
   const navigate = useNavigate()
+  const destino  = job.public_token ? `/trabajo/${job.public_token}` : `/trabajo/${job.id}`
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-violet-200">
       <div className="flex items-start justify-between gap-4">
@@ -255,33 +256,46 @@ function JobCard({ job }) {
             <User className="size-6 text-white" />
           </div>
           <div className="space-y-1">
-            <h3 className="font-semibold text-slate-800">{job.titulo}</h3>
+            <h3 className="font-semibold text-slate-800">{job.titulo ?? job.title}</h3>
             <div className="flex items-center gap-1.5 text-xs text-slate-500">
               <Building2 className="size-3.5 shrink-0" />
-              <span>{job.empresa}</span>
+              <span>{job.empresa ?? job.Department?.name ?? "—"}</span>
             </div>
             <div className="flex items-center gap-1.5 text-xs text-slate-500">
               <MapPin className="size-3.5 shrink-0" />
-              <span>{job.ubicacion} • {job.tipo}</span>
+              <span>Nicaragua • {job.tipo ?? "Full Time"}</span>
             </div>
           </div>
         </div>
         <button
-          onClick={() => navigate(`/trabajo/${job.id}`)}
+          onClick={() => navigate(destino)}
           className="shrink-0 rounded-xl bg-violet-600 px-4 py-2 text-xs font-semibold text-white transition-all hover:bg-violet-700 hover:shadow-lg hover:shadow-violet-200 hover:-translate-y-0.5 active:scale-[0.98]"
         >
           Ver detalles
         </button>
       </div>
-      <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-3 py-1.5">
-        <Sparkles className="size-3.5 shrink-0 text-teal-500" />
-        <span className="text-xs text-teal-600">{job.match}</span>
-      </div>
+      {job.match && (
+        <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-3 py-1.5">
+          <Sparkles className="size-3.5 shrink-0 text-teal-500" />
+          <span className="text-xs text-teal-600">{job.match}</span>
+        </div>
+      )}
     </div>
   )
 }
 
 // ─── Página principal ─────────────────────────────────────────────────────────
+
+function getTenantId() {
+  try {
+    const token = localStorage.getItem("applik_token")
+    if (token) {
+      const payload = JSON.parse(atob(token.split(".")[1]))
+      if (payload.company_id) return payload.company_id
+    }
+  } catch { /* ignorar */ }
+  return localStorage.getItem("applik_tenant_id") ?? null
+}
 
 export default function TrabajosPage() {
   const [searchParams]    = useSearchParams()
@@ -290,6 +304,8 @@ export default function TrabajosPage() {
   const [orden,           setOrden]           = useState("Más recientes")
   const [pagina,          setPagina]          = useState(1)
   const [filtrosMobile,   setFiltrosMobile]   = useState(false)
+  const [vacantesReales,  setVacantesReales]  = useState([])
+  const [cargando,        setCargando]        = useState(false)
 
   const [filtros, setFiltros] = useState({
     categorias:  [],
@@ -298,6 +314,17 @@ export default function TrabajosPage() {
     niveles:     [],
   })
   const [filtrosAplicados, setFiltrosAplicados] = useState(filtros)
+
+  useEffect(() => {
+    const tenantId = getTenantId() ?? searchParams.get("empresa")
+    if (!tenantId) return
+    setCargando(true)
+    fetch(`${import.meta.env.VITE_JOB_SERVICE_URL}/api/v1/jobs/public?tenant_id=${tenantId}`)
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data.data)) setVacantesReales(data.data) })
+      .catch(() => {})
+      .finally(() => setCargando(false))
+  }, [])
 
   const toggleFiltro = (clave, valor) => {
     setFiltros((prev) => {
@@ -315,9 +342,13 @@ export default function TrabajosPage() {
     setFiltrosMobile(false)
   }
 
-  const resultados = trabajos.filter((j) => {
-    const matchQ = !busqueda || j.titulo.toLowerCase().includes(busqueda.toLowerCase()) || j.empresa.toLowerCase().includes(busqueda.toLowerCase())
-    const matchC = filtrosAplicados.categorias.length  === 0 || filtrosAplicados.categorias.includes(j.categoria)
+  const listaBase = cargando ? [] : vacantesReales.length > 0 ? vacantesReales : trabajos
+
+  const resultados = listaBase.filter((j) => {
+    const titulo  = j.titulo ?? j.title ?? ""
+    const empresa = j.empresa ?? j.Department?.name ?? ""
+    const matchQ = !busqueda || titulo.toLowerCase().includes(busqueda.toLowerCase()) || empresa.toLowerCase().includes(busqueda.toLowerCase())
+    const matchC = filtrosAplicados.categorias.length  === 0 || filtrosAplicados.categorias.includes(j.categoria ?? j.Department?.name)
     const matchU = filtrosAplicados.ubicaciones.length === 0 || filtrosAplicados.ubicaciones.includes(j.ubicacion)
     const matchT = filtrosAplicados.tipos.length       === 0 || filtrosAplicados.tipos.includes(j.tipo)
     const matchN = filtrosAplicados.niveles.length     === 0 || filtrosAplicados.niveles.includes(j.nivel)

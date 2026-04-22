@@ -1,27 +1,55 @@
-import { ArrowLeft, MapPin, Tag, Pencil } from "lucide-react"
+import { useState } from "react"
+import { ArrowLeft, Tag, Pencil, Globe, Link, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
-// datos de prueba — se reemplaza con props o llamada a API
-const vacante = {
-  titulo: "Desarrollador Full Stack Senior",
-  categoria: "Tecnología",
-  ubicacion: "Managua",
-  diasActiva: 3,
-  descripcion: `Buscamos un Desarrollador Full Stack Senior apasionado por construir soluciones escalables y de alto rendimiento. Te unirás a un equipo ágil y dinámico, trabajando en el núcleo de nuestra plataforma SaaS principal. Serás responsable de diseñar, desarrollar y mantener características clave, colaborando estrechamente con diseñadores de producto y otros ingenieros para entregar valor continuo a nuestros usuarios.`,
-  experiencia: `5+ años de experiencia profesional en desarrollo de software.\nDominio de metodologías Ágiles (Scrum/Kanban) y flujo de trabajo GitFlow.`,
-  requisitos: [
-    "Experiencia sólida en React.js y su ecosistema (Redux, Context API, Hooks).",
-    "Dominio de Node.js y frameworks como Express o NestJS.",
-    "Experiencia trabajando con bases de datos relacionales (PostgreSQL y NoSQL (MongoDB).",
-    "Conocimientos profundos en arquitectura de microservicios y despliegues en AWS.",
-    "Capacidad para escribir código limpio, testeable y mantenible (TDD/BDD).",
-    "Nivel de inglés B2 o superior.",
-  ],
-  salarioMin: "$1,200",
-  salarioMax: "$1,900",
+function diasDesde(fecha) {
+  const diff = Date.now() - new Date(fecha).getTime()
+  return Math.floor(diff / (1000 * 60 * 60 * 24))
 }
 
-export default function DetallesVacantePage({ onBack, onEdit }) {
+export default function DetallesVacantePage({ vacante, onBack, onEdit, onStatusChange }) {
+  const [publicando,     setPublicando]     = useState(false)
+  const [copiado,        setCopiado]        = useState(false)
+  const [errorPublicar,  setErrorPublicar]  = useState("")
+  const token = localStorage.getItem("applik_token")
+
+  if (!vacante) return null
+
+  const dias = diasDesde(vacante.createdAt)
+  const reqLines = vacante.requirements
+    ? vacante.requirements.split("\n").filter(Boolean)
+    : []
+
+  const handlePublicar = async () => {
+    setPublicando(true)
+    setErrorPublicar("")
+    try {
+      const res = await fetch(`${import.meta.env.VITE_JOB_SERVICE_URL}/api/v1/jobs/${vacante.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ status: "published" }),
+      })
+      if (res.ok) {
+        onStatusChange?.()
+      } else if (res.status === 401) {
+        setErrorPublicar("Sesión expirada — cierra sesión y vuelve a entrar.")
+      } else {
+        setErrorPublicar("No se pudo publicar. Intenta de nuevo.")
+      }
+    } catch {
+      setErrorPublicar("Error de red. Verifica tu conexión.")
+    } finally {
+      setPublicando(false)
+    }
+  }
+
+  const handleCopiarLink = () => {
+    const url = `${window.location.origin}/trabajo/${vacante.public_token}`
+    navigator.clipboard.writeText(url)
+    setCopiado(true)
+    setTimeout(() => setCopiado(false), 2000)
+  }
+
   return (
     <div className="min-h-screen bg-applik-bg p-6">
       <div className="max-w-3xl mx-auto space-y-6">
@@ -39,17 +67,41 @@ export default function DetallesVacantePage({ onBack, onEdit }) {
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div className="space-y-2">
               <span className="inline-block rounded-full bg-teal-light/20 px-3 py-0.5 text-xs text-teal-dark font-medium">
-                Activa hace {vacante.diasActiva} días
+                {vacante.status === "published"
+                  ? `Activa hace ${dias} días`
+                  : vacante.status === "draft"
+                  ? "Borrador"
+                  : vacante.status === "paused"
+                  ? "Pausada"
+                  : "Cerrada"}
               </span>
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-800">{vacante.titulo}</h1>
-              <div className="flex items-center gap-3 text-sm text-slate-500">
-                <span className="flex items-center gap-1"><Tag className="size-3.5" />{vacante.categoria}</span>
-                <span className="flex items-center gap-1"><MapPin className="size-3.5" />{vacante.ubicacion}</span>
-              </div>
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-800">{vacante.title}</h1>
+              {vacante.Department?.name && (
+                <div className="flex items-center gap-3 text-sm text-slate-500">
+                  <span className="flex items-center gap-1">
+                    <Tag className="size-3.5" />{vacante.Department.name}
+                  </span>
+                </div>
+              )}
             </div>
-            <Button variant="outline" size="md" onClick={onEdit} className="w-full sm:w-auto shrink-0">
-              <Pencil /> Editar vacante
-            </Button>
+            <div className="flex gap-2 flex-wrap sm:flex-nowrap">
+              {vacante.status !== "published" && (
+                <div className="flex flex-col items-end gap-1">
+                  <Button variant="primary" size="md" onClick={handlePublicar} disabled={publicando} className="w-full sm:w-auto shrink-0">
+                    <Globe /> {publicando ? "Publicando..." : "Publicar"}
+                  </Button>
+                  {errorPublicar && <p className="text-xs text-red-500">{errorPublicar}</p>}
+                </div>
+              )}
+              {vacante.status === "published" && (
+                <Button variant="outline" size="md" onClick={handleCopiarLink} className="w-full sm:w-auto shrink-0">
+                  {copiado ? <><Check className="size-4" /> Copiado</> : <><Link className="size-4" /> Copiar link</>}
+                </Button>
+              )}
+              <Button variant="outline" size="md" onClick={onEdit} className="w-full sm:w-auto shrink-0">
+                <Pencil /> Editar vacante
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -58,30 +110,27 @@ export default function DetallesVacantePage({ onBack, onEdit }) {
 
           <section className="space-y-2">
             <h2 className="font-semibold text-slate-800">Descripción</h2>
-            <p className="text-sm text-slate-600 leading-relaxed">{vacante.descripcion}</p>
+            <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">{vacante.description}</p>
           </section>
 
-          <section className="space-y-2">
-            <h2 className="font-semibold text-slate-800">Experiencia</h2>
-            <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">{vacante.experiencia}</p>
-          </section>
-
-          <section className="space-y-2">
-            <h2 className="font-semibold text-slate-800">Requisitos</h2>
-            <ul className="space-y-1.5">
-              {vacante.requisitos.map((req, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
-                  <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-blue-dark" />
-                  {req}
-                </li>
-              ))}
-            </ul>
-          </section>
+          {reqLines.length > 0 && (
+            <section className="space-y-2">
+              <h2 className="font-semibold text-slate-800">Requisitos</h2>
+              <ul className="space-y-1.5">
+                {reqLines.map((req, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
+                    <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-blue-dark" />
+                    {req}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           <section className="space-y-2">
             <h2 className="font-semibold text-slate-800">Rango Salarial</h2>
             <p className="text-sm font-medium text-slate-700">
-              {vacante.salarioMin} – {vacante.salarioMax} mensuales
+              {Number(vacante.salary_min).toLocaleString("es")} – {Number(vacante.salary_max).toLocaleString("es")} {vacante.currency ?? "NIO"} mensuales
             </p>
           </section>
 

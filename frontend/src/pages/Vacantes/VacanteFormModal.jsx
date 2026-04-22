@@ -31,15 +31,15 @@ const rubrosLaborales = [
 export default function VacanteFormModal({ vacante = null, onClose, onSave }) {
   const isEditing = vacante !== null
 
-  const [titulo,        setTitulo]        = useState(vacante?.titulo       ?? "")
-  const [departamento,   setDepartamento]   = useState(vacante?.departamento  ?? "")
-  const [ubicacion,     setUbicacion]     = useState(vacante?.ubicacion    ?? "")
-  const [contrato,      setContrato]      = useState(vacante?.tipoContrato ?? "")
-  const [descripcion,   setDescripcion]   = useState(vacante?.descripcion  ?? "")
-  const [experiencia,   setExperiencia]   = useState(vacante?.experiencia  ?? "")
-  const [requisitos,    setRequisitos]    = useState(vacante?.requisitos   ?? "")
-  const [salarioMin,    setSalarioMin]    = useState(vacante?.salarioMin   ?? "")
-  const [salarioMax,    setSalarioMax]    = useState(vacante?.salarioMax   ?? "")
+  const [titulo,        setTitulo]        = useState(vacante?.title              ?? "")
+  const [departamento,   setDepartamento]   = useState(vacante?.Department?.name  ?? "")
+  const [ubicacion,     setUbicacion]     = useState(vacante?.location           ?? "")
+  const [contrato,      setContrato]      = useState(vacante?.contract_type      ?? "")
+  const [descripcion,   setDescripcion]   = useState(vacante?.description        ?? "")
+  const [experiencia,   setExperiencia]   = useState(vacante?.experience         ?? "")
+  const [requisitos,    setRequisitos]    = useState(vacante?.requirements       ?? "")
+  const [salarioMin,    setSalarioMin]    = useState(vacante?.salary_min         ?? "")
+  const [salarioMax,    setSalarioMax]    = useState(vacante?.salary_max         ?? "")
 
   const [departments,  setDepartments]  = useState([])
   const [urlEmpresa,   setUrlEmpresa]   = useState("")

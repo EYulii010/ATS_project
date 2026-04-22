@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Plus, Users, Pencil } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SearchInput } from "@/components/ui/Input"
@@ -6,33 +6,44 @@ import { Card, CardContent } from "@/components/ui/Card"
 import VacanteFormModal from "./VacanteFormModal"
 import DetallesVacantePage from "./DetallesVacantePage"
 
-const vacantesData = [
-  { id: 1, titulo: "Gerente de Ventas",     departamento: "Ventas",     aplicantes: 12, estado: "Activa", fechaPublicacion: "3/3/2026" },
-  { id: 2, titulo: "Marketing Specialist",  departamento: "Marketing",  aplicantes: 14, estado: "Activa", fechaPublicacion: "3/3/2026" },
-  { id: 3, titulo: "Contador Senior",       departamento: "Finanzas",   aplicantes: 12, estado: "Activa", fechaPublicacion: "3/3/2026" },
-  { id: 4, titulo: "Desarrollador Web",     departamento: "Tecnología", aplicantes: 12, estado: "Activa", fechaPublicacion: "3/3/2026" },
-]
-
 export default function VacantesPage() {
   const [busqueda, setBusqueda]     = useState("")
   const [vista, setVista]           = useState("list")
   const [vacanteActiva, setVacante] = useState(null)
   const [modal, setModal]           = useState(null)
+  const [vacantes, setVacantes]     = useState([])
+  const [cargando, setCargando]     = useState(true)
 
-  const vacantesFiltradas = vacantesData.filter((v) =>
-    v.titulo.toLowerCase().includes(busqueda.toLowerCase()) ||
-    v.departamento.toLowerCase().includes(busqueda.toLowerCase())
+  const token = localStorage.getItem("applik_token")
+
+  const cargarVacantes = () => {
+    if (!token) return
+    setCargando(true)
+    fetch(`${import.meta.env.VITE_JOB_SERVICE_URL}/api/v1/jobs`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.json())
+      .then(data => setVacantes(Array.isArray(data.data) ? data.data : []))
+      .catch(() => {})
+      .finally(() => setCargando(false))
+  }
+
+  useEffect(() => { cargarVacantes() }, [])
+
+  const vacantesFiltradas = vacantes.filter((v) =>
+    v.title.toLowerCase().includes(busqueda.toLowerCase()) ||
+    (v.Department?.name ?? "").toLowerCase().includes(busqueda.toLowerCase())
   )
 
   const abrirDetalles = (vacante) => { setVacante(vacante); setVista("detalles") }
   const volverALista  = () => { setVista("list"); setVacante(null) }
   const abrirEditar   = () => setModal("editar")
-  const cerrarModal   = () => setModal(null)
+  const cerrarModal   = () => { setModal(null); cargarVacantes() }
 
   if (vista === "detalles") {
     return (
       <>
-        <DetallesVacantePage onBack={volverALista} onEdit={abrirEditar} />
+        <DetallesVacantePage vacante={vacanteActiva} onBack={volverALista} onEdit={abrirEditar} onStatusChange={() => { volverALista(); cargarVacantes() }} />
         {modal === "editar" && (
           <VacanteFormModal vacante={vacanteActiva} onClose={cerrarModal} onSave={cerrarModal} />
         )}
@@ -92,23 +103,23 @@ export default function VacantesPage() {
                         onClick={() => abrirDetalles(v)}
                         className="text-left cursor-pointer hover:text-blue-dark transition-colors"
                       >
-                        <p className="font-medium text-slate-800">{v.titulo}</p>
-                        <p className="text-xs text-slate-400">Publicado {v.fechaPublicacion}</p>
+                        <p className="font-medium text-slate-800">{v.title}</p>
+                        <p className="text-xs text-slate-400">Publicado {new Date(v.createdAt).toLocaleDateString("es-NI")}</p>
                       </button>
                     </td>
 
-                    <td className="py-3 text-slate-600 whitespace-nowrap">{v.departamento}</td>
+                    <td className="py-3 text-slate-600 whitespace-nowrap">{v.Department?.name ?? "—"}</td>
 
                     <td className="py-3">
                       <span className="flex items-center gap-1.5 text-slate-600">
                         <Users className="size-4 text-slate-400" />
-                        {v.aplicantes}
+                        {v.application_count ?? 0}
                       </span>
                     </td>
 
                     <td className="py-3">
                       <span className="rounded-full bg-teal-light/20 px-3 py-0.5 text-xs font-medium text-teal-dark whitespace-nowrap">
-                        {v.estado}
+                        {v.status === "published" ? "Activa" : v.status === "draft" ? "Borrador" : v.status === "paused" ? "Pausada" : "Cerrada"}
                       </span>
                     </td>
 
@@ -127,7 +138,10 @@ export default function VacantesPage() {
               </tbody>
             </table>
 
-            {vacantesFiltradas.length === 0 && (
+            {cargando && (
+              <p className="py-8 text-center text-sm text-slate-400">Cargando vacantes...</p>
+            )}
+            {!cargando && vacantesFiltradas.length === 0 && (
               <p className="py-8 text-center text-sm text-slate-400">No se encontraron vacantes</p>
             )}
           </div>

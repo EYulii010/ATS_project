@@ -146,7 +146,7 @@ exports.getPublicJobs = async (request, reply) => {
     const { count, rows: jobs } = await Job.findAndCountAll({
       where: { tenant_id, status: 'published' },
       include: [{ model: Department, attributes: ['name'] }],
-      attributes: ['id', 'title', 'description', 'requirements', 'salary_min', 'salary_max', 'currency', 'closes_at', 'createdAt'],
+      attributes: ['id', 'public_token', 'title', 'description', 'requirements', 'salary_min', 'salary_max', 'currency', 'closes_at', 'createdAt'],
       order: [['createdAt', 'DESC']],
       limit,
       offset,
