@@ -54,7 +54,7 @@ export default function VacanteFormModal({ vacante = null, onClose, onSave }) {
 
   useEffect(() => {
     if (!token) return
-    fetch(`${import.meta.env.VITE_JOB_SERVICE_URL}/api/v1/jobs/departments`, {
+    fetch(`${import.meta.env.VITE_JOB_SERVICE_URL}/api/v1/departments`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(r => r.json())
@@ -97,7 +97,7 @@ export default function VacanteFormModal({ vacante = null, onClose, onSave }) {
 
     // Si el departamento no existe en el tenant aún, se crea automáticamente
     if (!dept) {
-      const createRes = await fetch(`${import.meta.env.VITE_JOB_SERVICE_URL}/api/v1/jobs/departments`, {
+      const createRes = await fetch(`${import.meta.env.VITE_JOB_SERVICE_URL}/api/v1/departments`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ name: departamento }),
