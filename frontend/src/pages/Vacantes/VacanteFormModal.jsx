@@ -54,11 +54,31 @@ export default function VacanteFormModal({ vacante = null, onClose, onSave }) {
 
   useEffect(() => {
     if (!token) return
-    fetch(`${import.meta.env.VITE_JOB_SERVICE_URL}/api/v1/jobs/departments`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    const DEPT_URL = `${import.meta.env.VITE_JOB_SERVICE_URL}/api/v1/departments`
+
+    fetch(DEPT_URL, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
-      .then(data => setDepartments(Array.isArray(data) ? data : []))
+      .then(async (data) => {
+        const existing = Array.isArray(data) ? data : []
+        setDepartments(existing)
+
+        const existingNames = new Set(existing.map(d => d.name))
+        const missing = rubrosLaborales.filter(r => !existingNames.has(r))
+
+        if (missing.length > 0) {
+          const created = await Promise.all(
+            missing.map(name =>
+              fetch(DEPT_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ name }),
+              }).then(r => r.ok ? r.json() : null)
+            )
+          )
+          const newDepts = created.filter(Boolean)
+          setDepartments(prev => [...prev, ...newDepts])
+        }
+      })
       .catch(() => {})
   }, [])
 
@@ -97,7 +117,7 @@ export default function VacanteFormModal({ vacante = null, onClose, onSave }) {
 
     // Si el departamento no existe en el tenant aún, se crea automáticamente
     if (!dept) {
-      const createRes = await fetch(`${import.meta.env.VITE_JOB_SERVICE_URL}/api/v1/jobs/departments`, {
+      const createRes = await fetch(`${import.meta.env.VITE_JOB_SERVICE_URL}/api/v1/departments`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ name: departamento }),
