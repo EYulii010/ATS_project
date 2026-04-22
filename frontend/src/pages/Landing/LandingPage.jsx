@@ -4,6 +4,15 @@ import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion"
 import { Sparkles, Zap, Shield, BarChart2, Users, CheckCircle2, ArrowRight, Menu, X, ChevronDown } from "lucide-react"
 import Logo from "@/components/ui/Logo"
 
+import dominusCan    from "@/assets/sponsors/dominus-can.jpg.jpeg"
+import elGolazo      from "@/assets/sponsors/el-golazo.jpg.jpeg"
+import tlaLogistics  from "@/assets/sponsors/tla-logistics.jpg.jpeg"
+import ucaSjrc       from "@/assets/sponsors/uca-sjrc.jpg.jpeg"
+import silvioArtola  from "@/assets/sponsors/silvio-artola.png.jpeg"
+import neuropasitos  from "@/assets/sponsors/neuropasitos.png.jpeg"
+import clinicaSanta  from "@/assets/sponsors/clinica-santamaria.jpg.jpeg"
+import nicashoe      from "@/assets/sponsors/nicashoe.png.jpeg"
+
 // ── Animation helpers ─────────────────────────────────────────────────────────
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 40 },
@@ -238,6 +247,58 @@ function Hero() {
               <ChevronDown className="size-4" />
             </motion.div>
           </a>
+        </motion.div>
+      </div>
+    </section>
+  )
+}
+
+// ── Trusted By ───────────────────────────────────────────────────────────────
+const sponsors = [
+  { src: dominusCan,   name: "Dominus Can" },
+  { src: elGolazo,     name: "Tienda El Golazo" },
+  { src: tlaLogistics, name: "Grupo TLA Logistics" },
+  { src: ucaSjrc,      name: "UCA SJRC R.L" },
+  { src: silvioArtola, name: "Silvio Artola" },
+  { src: neuropasitos, name: "Neuropasitos" },
+  { src: clinicaSanta, name: "Clínica Santamaría" },
+  { src: nicashoe,     name: "Nicashoe" },
+]
+
+function TrustedBy() {
+  const track = [...sponsors, ...sponsors]
+
+  return (
+    <section className="py-14 bg-white border-y border-slate-100 overflow-hidden">
+      <div className="max-w-6xl mx-auto px-6 mb-8 text-center">
+        <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
+          Empresas piloto que confían en Applik
+        </p>
+      </div>
+
+      <div className="relative">
+        {/* Fade edges */}
+        <div className="absolute left-0 top-0 bottom-0 w-24 z-10 pointer-events-none"
+          style={{ background: "linear-gradient(to right, white, transparent)" }} />
+        <div className="absolute right-0 top-0 bottom-0 w-24 z-10 pointer-events-none"
+          style={{ background: "linear-gradient(to left, white, transparent)" }} />
+
+        <motion.div
+          className="flex gap-6 w-max"
+          animate={{ x: ["0%", "-50%"] }}
+          transition={{ duration: 28, ease: "linear", repeat: Infinity }}
+        >
+          {track.map((s, i) => (
+            <div key={i}
+              className="flex items-center justify-center rounded-2xl border border-slate-100 bg-white shadow-sm shrink-0 overflow-hidden"
+              style={{ width: 140, height: 80 }}>
+              <img
+                src={s.src}
+                alt={s.name}
+                className="max-w-[110px] max-h-[60px] object-contain"
+              />
+            </div>
+          ))}
         </motion.div>
       </div>
     </section>
@@ -671,6 +732,7 @@ export default function LandingPage() {
     <div className="font-sans">
       <Navbar />
       <Hero />
+      <TrustedBy />
       <Features />
       <HowItWorks />
       <ProductPreview />

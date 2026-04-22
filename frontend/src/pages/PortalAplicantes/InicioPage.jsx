@@ -3,6 +3,15 @@ import { createPortal } from "react-dom"
 import { useNavigate } from "react-router-dom"
 import { Search, MapPin, Layers, Clock, ChevronLeft, ChevronRight, Building2, ChevronDown, X } from "lucide-react"
 
+import dominusCan    from "@/assets/sponsors/dominus-can.jpg.jpeg"
+import elGolazo      from "@/assets/sponsors/el-golazo.jpg.jpeg"
+import tlaLogistics  from "@/assets/sponsors/tla-logistics.jpg.jpeg"
+import ucaSjrc       from "@/assets/sponsors/uca-sjrc.jpg.jpeg"
+import silvioArtola  from "@/assets/sponsors/silvio-artola.png.jpeg"
+import neuropasitos  from "@/assets/sponsors/neuropasitos.png.jpeg"
+import clinicaSanta  from "@/assets/sponsors/clinica-santamaria.jpg.jpeg"
+import nicashoe      from "@/assets/sponsors/nicashoe.png.jpeg"
+
 // ─── Mock data ────────────────────────────────────────────────────────────────
 
 const coincidencias = [
@@ -25,7 +34,16 @@ const ultimasOfertas = [
   { id: 7, titulo: "Diseñador Grafico",     empresa: "Flor de Caña", ubicacion: "Managua", tipo: "Full-Time" },
 ]
 
-const empresas   = ["Claro", "Tigo", "Pepsi", "Flor de Caña", "Ogilvy", "BAC"]
+const empresas = [
+  { nombre: "Dominus Can",          logo: dominusCan   },
+  { nombre: "Tienda El Golazo",     logo: elGolazo     },
+  { nombre: "Grupo TLA Logistics",  logo: tlaLogistics },
+  { nombre: "UCA SJRC R.L",         logo: ucaSjrc      },
+  { nombre: "Silvio Artola",        logo: silvioArtola },
+  { nombre: "Neuropasitos",         logo: neuropasitos },
+  { nombre: "Clínica Santamaría",   logo: clinicaSanta },
+  { nombre: "Nicashoe",             logo: nicashoe     },
+]
 const ubicaciones = ["Managua", "León", "Granada", "Masaya", "Remoto"]
 const categorias  = ["Tecnología", "Marketing", "Finanzas", "Operaciones", "Diseño"]
 const modalidades = ["Full-Time", "Part-Time", "Remoto", "Híbrido"]
@@ -151,7 +169,6 @@ export default function InicioPage() {
     navigate(`/trabajos?${params.toString()}`)
   }
 
-  const maxIdx = Math.max(0, empresas.length - empresasVisibles)
 
   return (
     <div className="space-y-8 sm:space-y-12 pb-16">
@@ -285,28 +302,31 @@ export default function InicioPage() {
 
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setEmpresaIdx((i) => Math.max(0, i - 1))}
-            disabled={empresaIdx === 0}
-            className="flex size-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition-all hover:border-violet-300 hover:text-violet-600 disabled:opacity-30"
+            onClick={() => setEmpresaIdx((i) => (i - 1 + empresas.length) % empresas.length)}
+            className="flex size-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition-all hover:border-violet-300 hover:text-violet-600"
           >
             <ChevronLeft className="size-4" />
           </button>
 
           <div className="flex flex-1 gap-4 overflow-hidden">
-            {empresas.slice(empresaIdx, empresaIdx + empresasVisibles).map((e) => (
+            {Array.from({ length: empresasVisibles }, (_, i) => empresas[(empresaIdx + i) % empresas.length]).map((e, i) => (
               <div
-                key={e}
-                className="flex flex-1 items-center justify-center rounded-2xl border border-slate-200 bg-white py-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-md cursor-pointer"
+                key={`${e.nombre}-${i}`}
+                className="flex flex-1 items-center justify-center rounded-2xl border border-slate-200 bg-white py-4 px-3 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-md cursor-pointer"
+                style={{ minHeight: 80 }}
               >
-                <span className="text-sm font-semibold text-slate-700">{e}</span>
+                <img
+                  src={e.logo}
+                  alt={e.nombre}
+                  className="max-h-12 max-w-full object-contain"
+                />
               </div>
             ))}
           </div>
 
           <button
-            onClick={() => setEmpresaIdx((i) => Math.min(maxIdx, i + 1))}
-            disabled={empresaIdx >= maxIdx}
-            className="flex size-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition-all hover:border-violet-300 hover:text-violet-600 disabled:opacity-30"
+            onClick={() => setEmpresaIdx((i) => (i + 1) % empresas.length)}
+            className="flex size-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition-all hover:border-violet-300 hover:text-violet-600"
           >
             <ChevronRight className="size-4" />
           </button>
