@@ -26,8 +26,8 @@ export default function CvDropzone({ jobToken, onSuccess }) {
   const procesarArchivo = async (file) => {
     if (!file) return
     const ext = file.name.split(".").pop().toLowerCase()
-    if (!["pdf", "txt", "doc", "docx"].includes(ext)) {
-      setError("Solo se aceptan archivos PDF, TXT o DOC")
+    if (!["pdf", "txt"].includes(ext)) {
+      setError("Solo se aceptan archivos PDF o TXT")
       return
     }
     setArchivo(file)
@@ -112,7 +112,7 @@ export default function CvDropzone({ jobToken, onSuccess }) {
         <input
           ref={inputRef}
           type="file"
-          accept=".pdf,.txt,.doc,.docx"
+          accept=".pdf,.txt"
           className="hidden"
           onChange={e => procesarArchivo(e.target.files[0])}
         />
@@ -139,7 +139,7 @@ export default function CvDropzone({ jobToken, onSuccess }) {
             <Upload className="size-8 text-slate-300" />
             <div>
               <p className="text-sm font-medium text-slate-600">Arrastra tu CV aquí</p>
-              <p className="text-xs text-slate-400 mt-0.5">o haz clic para seleccionar · PDF, TXT o DOC</p>
+              <p className="text-xs text-slate-400 mt-0.5">o haz clic para seleccionar · PDF o TXT</p>
             </div>
           </div>
         )}

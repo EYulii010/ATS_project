@@ -280,7 +280,7 @@ export default function VacanteFormModal({ vacante = null, onClose, onSave }) {
               placeholder="Describe las responsabilidades y objetivos del puesto..."
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
-              rows={3}
+              rows={8}
             />
           </div>
 
