@@ -16,6 +16,14 @@ http:
       tls:
         certResolver: myresolver
 
+    departments:
+      rule: "Host(`api.applik-ni.com`) && PathPrefix(`/api/v1/departments`)"
+      entryPoints:
+        - websecure
+      service: job-service
+      tls:
+        certResolver: myresolver
+
     talent:
       rule: "Host(`api.applik-ni.com`) && PathPrefix(`/api/v1/talents`)"
       entryPoints:
