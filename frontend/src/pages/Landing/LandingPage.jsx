@@ -4,14 +4,14 @@ import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion"
 import { Sparkles, Zap, Shield, BarChart2, Users, CheckCircle2, ArrowRight, Menu, X, ChevronDown } from "lucide-react"
 import Logo from "@/components/ui/Logo"
 
-import dominusCan    from "@/assets/sponsors/dominus-can.jpg.jpeg"
-import elGolazo      from "@/assets/sponsors/el-golazo.jpg.jpeg"
-import tlaLogistics  from "@/assets/sponsors/tla-logistics.jpg.jpeg"
-import ucaSjrc       from "@/assets/sponsors/uca-sjrc.jpg.jpeg"
-import silvioArtola  from "@/assets/sponsors/silvio-artola.png.jpeg"
-import neuropasitos  from "@/assets/sponsors/neuropasitos.png.jpeg"
-import clinicaSanta  from "@/assets/sponsors/clinica-santamaria.jpg.jpeg"
-import nicashoe      from "@/assets/sponsors/nicashoe.png.jpeg"
+import dominusCan    from "@/assets/partners/dominus-can.jpg.jpeg"
+import elGolazo      from "@/assets/partners/el-golazo.jpg.jpeg"
+import tlaLogistics  from "@/assets/partners/tla-logistics.jpg.jpeg"
+import ucaSjrc       from "@/assets/partners/uca-sjrc.jpg.jpeg"
+import silvioArtola  from "@/assets/partners/silvio-artola.png.jpeg"
+import neuropasitos  from "@/assets/partners/neuropasitos.png.jpeg"
+import clinicaSanta  from "@/assets/partners/clinica-santamaria.jpg.jpeg"
+import nicashoe      from "@/assets/partners/nicashoe.png.jpeg"
 
 // ── Animation helpers ─────────────────────────────────────────────────────────
 const fadeUp = (delay = 0) => ({
